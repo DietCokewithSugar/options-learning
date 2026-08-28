@@ -27,7 +27,7 @@
   --mono:"SF Mono","JetBrains Mono","Roboto Mono",Consolas,"Courier New",monospace;
 }
 *{box-sizing:border-box}
-html{scroll-behavior:smooth}
+html{scroll-behavior:smooth;scroll-padding-top:64px;-webkit-text-size-adjust:100%}
 body{
   margin:0;background:var(--paper);color:var(--ink);font-family:var(--body);
   font-size:15px;line-height:1.75;-webkit-font-smoothing:antialiased;
@@ -115,7 +115,23 @@ label.ctrl span{
   letter-spacing:.1em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:4px;
 }
 label.ctrl span b{color:var(--ink);font-weight:600;font-size:12px}
-input[type=range]{width:100%;accent-color:var(--accent);height:20px}
+input[type=range]{
+  -webkit-appearance:none;appearance:none;width:100%;height:34px;margin:0;
+  background:transparent;cursor:pointer;touch-action:pan-y;
+}
+input[type=range]::-webkit-slider-runnable-track{height:4px;border-radius:2px;background:var(--grid-strong)}
+input[type=range]::-moz-range-track{height:4px;border-radius:2px;background:var(--grid-strong)}
+input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance:none;appearance:none;width:22px;height:22px;margin-top:-9px;border-radius:50%;
+  background:var(--accent);border:2px solid #fff;box-shadow:0 1px 3px rgba(19,26,34,.32);transition:transform .12s;
+}
+input[type=range]::-moz-range-thumb{
+  width:22px;height:22px;border:2px solid #fff;border-radius:50%;
+  background:var(--accent);box-shadow:0 1px 3px rgba(19,26,34,.32);
+}
+input[type=range]:active::-webkit-slider-thumb{transform:scale(1.18)}
+input[type=range]:active::-moz-range-thumb{transform:scale(1.18)}
+input[type=range]:focus-visible::-webkit-slider-thumb{outline:2px solid var(--accent);outline-offset:2px}
 input[type=number],input[type=text],select{
   width:100%;font-family:var(--mono);font-size:13px;padding:6px 8px;
   border:1px solid var(--rule);border-radius:3px;background:#fff;color:var(--ink);
@@ -129,6 +145,7 @@ button.btn{
 button.btn:hover{border-color:var(--accent);color:var(--accent)}
 button.btn.on{background:var(--accent);border-color:var(--accent);color:#fff}
 .chipbar{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
+.ctrl-hint{display:flex;align-items:flex-end;padding-bottom:12px;font-size:13px;color:var(--ink-soft)}
 
 /* ---------- 策略库 ---------- */
 .filterbar{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:22px;align-items:center}
@@ -157,6 +174,7 @@ button.btn.on{background:var(--accent);border-color:var(--accent);color:#fff}
 .example h5{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--amber);margin:0 0 8px}
 
 /* ---------- 图 ---------- */
+.tablewrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
 .chartbox{background:#fff;border:1px solid var(--rule);border-radius:3px;padding:6px}
 svg.payoff{display:block;width:100%;height:auto;touch-action:pan-y}
 .legend{display:flex;gap:16px;flex-wrap:wrap;font-family:var(--mono);font-size:10px;color:var(--ink-soft);padding:6px 8px 2px;letter-spacing:.06em}
@@ -170,6 +188,8 @@ svg.payoff{display:block;width:100%;height:auto;touch-action:pan-y}
 /* ---------- builder ---------- */
 .leg-row{display:grid;grid-template-columns:60px 66px 1fr 1fr 54px 28px;gap:6px;align-items:center;margin-bottom:6px}
 .leg-row .lbl{font-family:var(--mono);font-size:9px;color:var(--ink-faint);letter-spacing:.08em;text-transform:uppercase}
+.lf{display:block;min-width:0}
+.lf b{display:none}
 .xbtn{border:none;background:none;color:var(--ink-faint);cursor:pointer;font-size:16px;line-height:1;padding:4px}
 .xbtn:hover{color:var(--loss)}
 
@@ -189,9 +209,83 @@ footer .disc{font-family:var(--mono);font-size:11px;line-height:1.9;letter-spaci
 
 @media(max-width:860px){
   .grid2,.grid3,.twocol{grid-template-columns:1fr}
-  .leg-row{grid-template-columns:56px 60px 1fr 1fr 48px 24px}
   .hero{padding:40px 0 30px}
   section.chapter{padding:40px 0}
+}
+
+/* ---------- 移动端 ---------- */
+@media(max-width:640px){
+  body{font-size:15.5px;background-size:22px 22px}
+  .wrap{padding:0 16px}
+  html{scroll-padding-top:56px}
+
+  /* 顶栏：品牌缩短，导航整行横向滚动并带边缘渐隐 */
+  .top-in{height:52px;gap:12px}
+  .brand{font-size:16px}
+  .brand span{display:none}
+  nav.top-nav{
+    gap:0;-webkit-overflow-scrolling:touch;
+    mask-image:linear-gradient(90deg,#000 calc(100% - 20px),transparent);
+  }
+  nav.top-nav a{padding:8px 10px;font-size:11.5px}
+
+  .hero{padding:28px 0 24px}
+  .hero p{font-size:15.5px}
+  .ch-sub{margin-bottom:22px}
+  .pad{padding:14px}
+  .strat-body{padding:14px}
+
+  /* 触摸目标不小于 40px，输入框 16px 以避免 iOS 聚焦时自动放大 */
+  button.btn{padding:10px 13px;font-size:11.5px;min-height:40px}
+  .opt{padding:12px 13px;font-size:15px}
+  input[type=number],input[type=text],select{font-size:16px;padding:9px 10px;min-height:42px}
+  input[type=range]{height:40px}
+  input[type=range]::-webkit-slider-thumb{width:28px;height:28px;margin-top:-12px}
+  input[type=range]::-moz-range-thumb{width:28px;height:28px}
+  label.ctrl span{font-size:11px}
+  label.ctrl span b{font-size:14px}
+  .xbtn{font-size:22px;padding:8px 10px;min-width:40px;min-height:40px}
+
+  /* 头寸构成：网格排不下，改成一行一张卡片，每个字段自带名字 */
+  .leg-row:not([data-label]){display:none}      /* 桌面端那一行表头在这里没有意义 */
+  .lf b{
+    display:block;font-family:var(--mono);font-size:9.5px;letter-spacing:.08em;
+    text-transform:uppercase;color:var(--ink-faint);margin-bottom:3px;font-weight:400;
+  }
+  .leg-row{
+    grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;position:relative;
+    border:1px solid var(--rule);border-radius:4px;background:#fff;padding:10px 40px 10px 10px;
+  }
+  .leg-row .xbtn{position:absolute;top:6px;right:4px}
+  .leg-row::before{
+    content:attr(data-label);grid-column:1/-1;font-family:var(--mono);font-size:9.5px;
+    letter-spacing:.1em;text-transform:uppercase;color:var(--ink-faint);
+  }
+
+  /* 读数条：两列网格，数字不再被挤成一列 */
+  .readout{display:grid;grid-template-columns:1fr 1fr;border-left:1px solid var(--rule)}
+  .readout div{min-width:0;border-bottom:1px solid var(--rule)}
+  .readout div:last-child{border-right:1px solid var(--rule)}
+  .readout div:nth-child(2n){border-right:1px solid var(--rule)}
+  .readout i{font-size:14px}
+  .stat{min-width:0;flex:1 1 50%;border-bottom:1px solid var(--rule)}
+  .stat:nth-child(2n){border-right:none}
+
+  /* 策略库标题行：允许换行，序号与名称在上，标签在下 */
+  .strat-head{flex-wrap:wrap;gap:6px 10px;padding:13px 14px}
+  .strat-name{font-size:17px}
+  .strat-en{flex:1 0 100%;order:5;white-space:normal}
+  .kv{grid-template-columns:1fr;gap:2px}
+  .kv dt{padding-top:9px}
+  .legend{gap:10px;font-size:10.5px}
+  table.t th,table.t td{padding:8px 9px}
+  .note,.warn{padding:11px 13px;font-size:13.5px}
+}
+@media(hover:none){
+  button.btn:hover{border-color:var(--rule);color:var(--ink-soft)}
+  button.btn.on:hover{border-color:var(--accent);color:#fff}
+  .strat-head:hover{background:transparent}
+  .strat.open .strat-head{background:#fff}
 }
 @media(prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
 </style>
@@ -215,7 +309,7 @@ footer .disc{font-family:var(--mono);font-size:11px;line-height:1.9;letter-spaci
 </header>
 
 <div class="hero wrap">
-  <div class="eyebrow">从合约要素到 18 种结构 · 每一页都能拖</div>
+  <div class="eyebrow">从合约要素到 19 种结构 · 每一页都能拖</div>
   <h1>期权不是赌方向，<br>是给<em>概率分布</em>定价。</h1>
   <p>这个工作台把期权拆成三件事：你买卖的是什么结构、这个结构在哪些股价下赚钱、以及时间和波动率会怎么改变它。所有损益图都可以直接拖动——改行权价、改权利金、改剩余天数，图形会实时重画。先从下面这张图开始：拖一拖，看看备兑开仓的形状是怎么来的。</p>
 
@@ -274,51 +368,142 @@ function bs(S, K, T, v, r, type) {
   return { price, delta, gamma: ndf(d1) / (S * v * sq), theta, vega: S * ndf(d1) * sq / 100 };
 }
 
+/* 由权利金反解隐含波动率（二分法）。价格在无套利区间外时返回 null。 */
+function impliedVol(price, S, K, T, r, type) {
+  if (!(T > 0) || !(price > 0) || !(S > 0) || !(K > 0)) return null;
+  const disc = Math.exp(-r * T);
+  const floor = type === "call" ? Math.max(S - K * disc, 0) : Math.max(K * disc - S, 0);
+  const ceil = type === "call" ? S : K * disc;
+  if (price <= floor || price >= ceil) return null;
+  let lo = 1e-4, hi = 5;
+  if (bs(S, K, T, hi, r, type).price < price) return null;
+  for (let i = 0; i < 80; i++) {
+    const mid = (lo + hi) / 2;
+    if (bs(S, K, T, mid, r, type).price < price) lo = mid; else hi = mid;
+  }
+  return (lo + hi) / 2;
+}
+
 /* ================= 损益计算 ================= */
-/* leg: {kind:'call'|'put'|'stock', dir:1|-1, K, prem, qty} —— stock 腿的 K 表示建仓成本，qty 表示 100 股的份数 */
-function payoffExp(legs, S) {
+/* leg: {kind:'call'|'put'|'stock', dir:1|-1, K, prem, qty, dte?}
+   stock 腿的 K 表示建仓成本，qty 表示 100 股的份数；
+   dte 是这条腿自己的到期天数，只有各腿到期日不同的结构（日历、对角）才需要填。 */
+
+/* 评估时点 = 最近的那条腿到期的那天。各腿都不带 dte 时为 0，即全部按到期取内在价值。 */
+function horizonOf(legs) {
+  const d = legs.filter(l => l.kind !== "stock" && l.dte != null).map(l => l.dte);
+  return d.length ? Math.min(...d) : 0;
+}
+/* 到期损益。
+   同月结构里每条腿都取内在价值，曲线是分段线性的。
+   跨月结构（日历/对角）在近月到期日评估：近月腿归于内在价值，远月腿还剩
+   (dte − horizon) 的时间，必须用 Black-Scholes 定价——这正是这类结构赚的钱。
+   若把远月腿也当作同时到期，两条腿会相互抵消，画出来是一条毫无意义的水平线。 */
+function payoffExp(legs, S, iv = .30, r = .04) {
+  const horizon = horizonOf(legs);
   let v = 0;
   for (const l of legs) {
     const q = l.dir * l.qty * M;
-    if (l.kind === "stock") v += q * (S - l.K);
-    else if (l.kind === "call") v += q * (Math.max(S - l.K, 0) - l.prem);
-    else v += q * (Math.max(l.K - S, 0) - l.prem);
+    if (l.kind === "stock") { v += q * (S - l.K); continue; }
+    const left = ((l.dte ?? horizon) - horizon) / 365;
+    const val = left > 0 ? bs(S, l.K, left, iv, r, l.kind).price
+      : (l.kind === "call" ? Math.max(S - l.K, 0) : Math.max(l.K - S, 0));
+    v += q * (val - l.prem);
   }
   return v;
 }
+/* 当前理论损益：带 dte 的腿用自己的剩余时间，其余用图上的 T */
 function payoffNow(legs, S, T, iv, r) {
   let v = 0;
   for (const l of legs) {
     const q = l.dir * l.qty * M;
     if (l.kind === "stock") v += q * (S - l.K);
-    else v += q * (bs(S, l.K, T, iv, r, l.kind).price - l.prem);
+    else v += q * (bs(S, l.K, l.dte != null ? l.dte / 365 : T, iv, r, l.kind).price - l.prem);
   }
   return v;
 }
+/* 到期损益关于股价是分段线性的，拐点只可能落在行权价上。
+   因此只要在 {0, 各行权价, 远端} 这组节点取值，极值与盈亏平衡点都是精确解，
+   不依赖采样密度（旧的等距扫描会漏掉不在网格上的行权价）。 */
 function metrics(legs, S0) {
-  const hi = Math.max(S0 * 4, 20), pts = [];
-  for (let i = 0; i <= 2000; i++) { const s = hi * i / 2000; pts.push([s, payoffExp(legs, s)]); }
-  let maxP = -Infinity, maxL = Infinity;
-  for (const [, y] of pts) { maxP = Math.max(maxP, y); maxL = Math.min(maxL, y); }
-  // 上行是否无界：股价 → ∞ 时的斜率
+  const net = legs.reduce((a, l) => a + (l.kind === "stock" ? 0 : -l.dir * l.qty * l.prem * M), 0);
+  if (!legs.length) return { maxP: 0, maxL: 0, be: [], net: 0 };
+  const strikes = legs.filter(l => l.kind !== "stock").map(l => l.K);
+  const far = Math.max(S0 * 4, 20, ...strikes.map(k => k * 2));
+  const horizon = horizonOf(legs);
+  const smooth = legs.some(l => l.kind !== "stock" && ((l.dte ?? horizon) - horizon) > 0);
+  // 光滑曲线（有腿在评估时点尚未到期）用稠密采样 + 三分/二分细化；分段线性则节点即精确解
+  const knots = smooth
+    ? Array.from({ length: 2001 }, (_, i) => far * i / 2000)
+    : [...new Set([0, far, ...strikes.filter(k => k > 0 && k < far)])].sort((a, b) => a - b);
+  const ys = knots.map(s => payoffExp(legs, s));
+  let maxP = Math.max(...ys), maxL = Math.min(...ys);
+  if (smooth) {
+    // 极值落在采样点之间，用三分搜索把它收敛到机器精度
+    const refine = (idx, sign) => {
+      let a = knots[Math.max(idx - 1, 0)], b = knots[Math.min(idx + 1, knots.length - 1)];
+      for (let i = 0; i < 80 && b - a > 1e-9; i++) {
+        const m1 = a + (b - a) / 3, m2 = b - (b - a) / 3;
+        if (sign * payoffExp(legs, m1) < sign * payoffExp(legs, m2)) a = m1; else b = m2;
+      }
+      return payoffExp(legs, (a + b) / 2);
+    };
+    maxP = refine(ys.indexOf(maxP), 1);
+    maxL = refine(ys.indexOf(maxL), -1);
+  }
+  // 股价 → ∞ 时的斜率决定上行/下行是否无界（Put 在此方向斜率为 0）
   let slopeUp = 0;
   for (const l of legs) { if (l.kind === "call" || l.kind === "stock") slopeUp += l.dir * l.qty; }
   if (slopeUp > 0) maxP = Infinity;
   if (slopeUp < 0) maxL = -Infinity;
   const be = [];
-  for (let i = 1; i < pts.length; i++) {
-    const [x0, y0] = pts[i - 1], [x1, y1] = pts[i];
-    if ((y0 < 0 && y1 >= 0) || (y0 > 0 && y1 <= 0)) be.push(x0 + (x1 - x0) * (-y0) / (y1 - y0));
+  for (let i = 0; i < knots.length; i++) {
+    if (ys[i] === 0) { be.push(knots[i]); continue; }
+    if (!i || !((ys[i - 1] < 0 && ys[i] > 0) || (ys[i - 1] > 0 && ys[i] < 0))) continue;
+    let a = knots[i - 1], b = knots[i];
+    if (smooth) {                      // 光滑段：二分求根
+      let fa = ys[i - 1];
+      for (let k = 0; k < 60 && b - a > 1e-10; k++) {
+        const m = (a + b) / 2, fm = payoffExp(legs, m);
+        if ((fa < 0) === (fm < 0)) { a = m; fa = fm; } else b = m;
+      }
+      be.push((a + b) / 2);
+    } else {                           // 线性段：插值即精确解
+      be.push(a + (b - a) * (-ys[i - 1]) / (ys[i] - ys[i - 1]));
+    }
   }
-  return { maxP, maxL, be, net: legs.reduce((a, l) => a + (l.kind === "stock" ? 0 : -l.dir * l.qty * l.prem * M), 0) };
+  return { maxP, maxL, be: be.sort((a, b) => a - b), net };
 }
+
+/* ================= 响应式画布 =================
+   SVG 用固定 viewBox 等比缩放：桌面 720 宽缩到容器约 1.5 倍，10px 的刻度约合 15px；
+   但在 360px 的手机上要缩到 0.5 倍，同样的刻度只剩 5px，完全读不了。
+   所以窄屏改用更窄的画布 + 更大的字号，让最终落到屏幕上的字号保持在 12px 上下。 */
+const NARROW_Q = window.matchMedia("(max-width:640px)");
+const isNarrow = () => NARROW_Q.matches;
+const REDRAW = new Set();                 // 断点切换时需要重画的图
+const onRedraw = fn => { REDRAW.add(fn); return fn; };
+function chartGeom(h) {
+  const n = isNarrow();
+  return n
+    ? { W: 400, H: h, mL: 46, mR: 10, mT: 10, mB: 26, ax: 12, xdiv: 4, ydiv: 4, compact: true }
+    : { W: 720, H: h, mL: 54, mR: 16, mT: 14, mB: 30, ax: 10, xdiv: 6, ydiv: 5, compact: false };
+}
+/* 轴上的金额：窄屏用 $1.2k 这种紧凑写法，否则 y 轴留白吃不下 */
+const snap0 = (v, step) => (Math.abs(v) < Math.abs(step) * 1e-9 ? 0 : v);
+const axMoney = (v, compact) => {
+  const a = Math.abs(v), sg = v < 0 ? "-" : "";
+  if (v === 0) return "0";
+  if (compact && a >= 1000) return sg + "$" + fmt(a / 1000, a >= 10000 ? 0 : 1) + "k";
+  return sg + "$" + fmt(a, 0);
+};
 
 /* ================= SVG 损益图 ================= */
 let uid = 0;
 function payoffChart(host, cfg) {
   const o = Object.assign({ legs: [], S0: 100, T: 45 / 365, iv: .30, r: .04, showTheo: true, span: .45, readout: true, h: 300 }, cfg);
   const id = "c" + (++uid);
-  const W = 720, H = o.h, mL = 54, mR = 16, mT = 14, mB = 30;
+  const { W, H, mL, mR, mT, mB, ax, xdiv, ydiv, compact } = chartGeom(o.h);
   const iw = W - mL - mR, ih = H - mT - mB;
   const xmin = Math.max(0.01, o.S0 * (1 - o.span)), xmax = o.S0 * (1 + o.span);
 
@@ -341,15 +526,15 @@ function payoffChart(host, cfg) {
 
   // 网格刻度
   let grid = "", xticks = "", yticks = "";
-  const step = niceStep((xmax - xmin) / 6);
+  const step = niceStep((xmax - xmin) / xdiv);
   for (let s = Math.ceil(xmin / step) * step; s <= xmax; s += step) {
     grid += `<line x1="${X(s)}" y1="${mT}" x2="${X(s)}" y2="${mT + ih}" stroke="var(--grid)" stroke-width="1"/>`;
     xticks += `<text x="${X(s)}" y="${mT + ih + 18}" text-anchor="middle" class="ax">${Math.round(s)}</text>`;
   }
-  const vstep = niceStep((hi - lo) / 5);
+  const vstep = niceStep((hi - lo) / ydiv);
   for (let v = Math.ceil(lo / vstep) * vstep; v <= hi; v += vstep) {
     grid += `<line x1="${mL}" y1="${Y(v)}" x2="${mL + iw}" y2="${Y(v)}" stroke="var(--grid)" stroke-width="1"/>`;
-    yticks += `<text x="${mL - 8}" y="${Y(v) + 4}" text-anchor="end" class="ax">${v === 0 ? "0" : (v >= 0 ? "" : "-") + "$" + fmt(Math.abs(v), 0)}</text>`;
+    yticks += `<text x="${mL - 8}" y="${Y(v) + 4}" text-anchor="end" class="ax">${axMoney(snap0(v, vstep), compact)}</text>`;
   }
   // 行权价竖线
   let kl = "";
@@ -364,7 +549,7 @@ function payoffChart(host, cfg) {
   host.innerHTML = `
   <div class="chartbox">
     <svg class="payoff" viewBox="0 0 ${W} ${H}" role="img" aria-label="损益结构图">
-      <style>.ax{font-family:var(--mono);font-size:10px;fill:var(--ink-faint)}</style>
+      <style>.ax{font-family:var(--mono);font-size:${ax}px;fill:var(--ink-faint)}</style>
       <defs>
         <clipPath id="up${id}"><rect x="${mL}" y="${mT}" width="${iw}" height="${Math.max(0, y0 - mT)}"/></clipPath>
         <clipPath id="dn${id}"><rect x="${mL}" y="${y0}" width="${iw}" height="${Math.max(0, mT + ih - y0)}"/></clipPath>
@@ -382,7 +567,7 @@ function payoffChart(host, cfg) {
         <line y1="${mT}" y2="${mT + ih}" stroke="var(--ink)" stroke-width="1" stroke-dasharray="3 3"/>
         <circle r="4.5" fill="var(--ink)"/>
       </g>
-      <rect x="${mL}" y="${mT}" width="${iw}" height="${ih}" fill="transparent" id="hit${id}"/>
+      <rect x="${mL}" y="${mT}" width="${iw}" height="${ih}" fill="transparent" id="hit${id}" style="touch-action:pan-y"/>
       ${xticks}${yticks}
     </svg>
     <div class="legend">
@@ -400,28 +585,41 @@ function payoffChart(host, cfg) {
       <div id="hov${id}"><b>指针处损益</b><i>移到图上</i></div>
     </div>` : ""}`;
 
-  // 交互：在图上滑动可读出任意股价的损益
+  /* 交互：鼠标滑动或手指拖动都能读出任意股价的损益。
+     统一走 Pointer Events —— 旧的 mousemove/touchmove 组合在触屏上不会派发 mousemove，
+     手指按住不动时读数出不来。触摸抬起后保留十字线，方便看清数字。 */
   const svg = host.querySelector("svg"), hit = host.querySelector("#hit" + id),
     cross = host.querySelector("#cross" + id), hov = host.querySelector("#hov" + id);
   if (hit) {
-    const move = e => {
+    const crossLine = cross.querySelector("line"), crossDot = cross.querySelector("circle");
+    const show = clientX => {
       const r = svg.getBoundingClientRect();
-      const px = ((e.touches ? e.touches[0].clientX : e.clientX) - r.left) / r.width * W;
-      const s = xmin + (px - mL) / iw * (xmax - xmin);
-      if (s < xmin || s > xmax) return;
+      if (!r.width) return;
+      const px = (clientX - r.left) / r.width * W;
+      const s = Math.min(xmax, Math.max(xmin, xmin + (px - mL) / iw * (xmax - xmin)));
       const v = payoffExp(o.legs, s);
-      cross.style.display = ""; cross.querySelector("line").setAttribute("x1", X(s));
-      cross.querySelector("line").setAttribute("x2", X(s));
-      cross.querySelector("circle").setAttribute("cx", X(s));
-      cross.querySelector("circle").setAttribute("cy", Y(v));
+      cross.style.display = "";
+      crossLine.setAttribute("x1", X(s)); crossLine.setAttribute("x2", X(s));
+      crossDot.setAttribute("cx", X(s)); crossDot.setAttribute("cy", Y(v));
       if (hov) hov.innerHTML = `<b>股价 $${fmt(s, 2)} 时</b><i class="${v >= 0 ? "gain" : "loss"}">${usd(v)}</i>`;
     };
-    hit.addEventListener("mousemove", move);
-    hit.addEventListener("touchmove", e => { move(e); }, { passive: true });
-    hit.addEventListener("mouseleave", () => { cross.style.display = "none"; if (hov) hov.innerHTML = "<b>指针处损益</b><i>移到图上</i>"; });
+    const hide = () => {
+      cross.style.display = "none";
+      if (hov) hov.innerHTML = `<b>指针处损益</b><i>${isNarrow() ? "点一下图" : "移到图上"}</i>`;
+    };
+    hit.addEventListener("pointerdown", e => {
+      if (e.pointerType !== "mouse") { try { hit.setPointerCapture(e.pointerId); } catch (_) {} }
+      show(e.clientX);
+    });
+    hit.addEventListener("pointermove", e => {
+      if (e.pointerType === "mouse" || e.buttons || hit.hasPointerCapture?.(e.pointerId)) show(e.clientX);
+    });
+    hit.addEventListener("pointerleave", e => { if (e.pointerType === "mouse") hide(); });
+    if (hov && isNarrow()) hov.innerHTML = `<b>指针处损益</b><i>点一下图</i>`;
   }
 }
 function niceStep(raw) {
+  if (!(raw > 0) || !isFinite(raw)) return 1;
   const p = Math.pow(10, Math.floor(Math.log10(raw))), n = raw / p;
   return (n <= 1 ? 1 : n <= 2 ? 2 : n <= 5 ? 5 : 10) * p;
 }
@@ -429,29 +627,30 @@ function niceStep(raw) {
 /* ================= 通用折线图（希腊字母用） ================= */
 function lineChart(host, cfg) {
   const o = Object.assign({ series: [], xmin: 60, xmax: 140, xlabel: "股价", h: 240, marker: null, zero: false }, cfg);
-  const W = 720, H = o.h, mL = 56, mR = 14, mT = 12, mB = 28, iw = W - mL - mR, ih = H - mT - mB;
+  const g = chartGeom(o.h), W = g.W, H = g.H, mL = g.mL + 2, mR = g.mR, mT = g.mT, mB = g.mB;
+  const iw = W - mL - mR, ih = H - mT - mB;
   let lo = Infinity, hi = -Infinity;
   o.series.forEach(s => s.data.forEach(([, y]) => { lo = Math.min(lo, y); hi = Math.max(hi, y); }));
   if (o.zero) { lo = Math.min(lo, 0); hi = Math.max(hi, 0); }
   const pad = (hi - lo) * .12 || 1; lo -= pad; hi += pad;
   const X = x => mL + (x - o.xmin) / (o.xmax - o.xmin) * iw, Y = y => mT + (hi - y) / (hi - lo) * ih;
   let grid = "", xt = "", yt = "";
-  const st = niceStep((o.xmax - o.xmin) / 6);
+  const st = niceStep((o.xmax - o.xmin) / g.xdiv);
   for (let x = Math.ceil(o.xmin / st) * st; x <= o.xmax; x += st) {
     grid += `<line x1="${X(x)}" y1="${mT}" x2="${X(x)}" y2="${mT + ih}" stroke="var(--grid)"/>`;
-    xt += `<text x="${X(x)}" y="${mT + ih + 17}" text-anchor="middle" class="ax">${fmt(x, x % 1 ? 2 : 0)}</text>`;
+    xt += `<text x="${X(x)}" y="${mT + ih + 17}" text-anchor="middle" class="ax">${fmt(snap0(x, st), Math.abs(x % 1) > 1e-9 ? 2 : 0)}</text>`;
   }
-  const vs = niceStep((hi - lo) / 4);
+  const vs = niceStep((hi - lo) / g.ydiv);
   for (let v = Math.ceil(lo / vs) * vs; v <= hi; v += vs) {
     grid += `<line x1="${mL}" y1="${Y(v)}" x2="${mL + iw}" y2="${Y(v)}" stroke="var(--grid)"/>`;
-    yt += `<text x="${mL - 8}" y="${Y(v) + 4}" text-anchor="end" class="ax">${fmt(v, Math.abs(vs) < 1 ? 2 : 0)}</text>`;
+    yt += `<text x="${mL - 8}" y="${Y(v) + 4}" text-anchor="end" class="ax">${fmt(snap0(v, vs), Math.abs(vs) < 1 ? 2 : 0)}</text>`;
   }
   const lines = o.series.map(s =>
     `<path d="${s.data.map(([x, y], i) => (i ? "L" : "M") + X(x).toFixed(1) + " " + Y(y).toFixed(1)).join(" ")}"
       fill="none" stroke="${s.color}" stroke-width="${s.w || 2.2}" ${s.dash ? 'stroke-dasharray="5 4"' : ""}/>`).join("");
   const mk = o.marker !== null ? `<line x1="${X(o.marker)}" y1="${mT}" x2="${X(o.marker)}" y2="${mT + ih}" stroke="var(--amber)" stroke-width="1.4"/>` : "";
   host.innerHTML = `<div class="chartbox"><svg class="payoff" viewBox="0 0 ${W} ${H}">
-    <style>.ax{font-family:var(--mono);font-size:10px;fill:var(--ink-faint)}</style>
+    <style>.ax{font-family:var(--mono);font-size:${g.ax}px;fill:var(--ink-faint)}</style>
     ${grid}${o.zero ? `<line x1="${mL}" y1="${Y(0)}" x2="${mL + iw}" y2="${Y(0)}" stroke="var(--ink-soft)" stroke-width="1.1"/>` : ""}
     ${mk}${lines}${xt}${yt}
     <text x="${mL + iw / 2}" y="${H - 2}" text-anchor="middle" class="ax">${o.xlabel}</text>
@@ -729,49 +928,49 @@ const STRATEGIES = [
 },
 {
   id:"calendar", name:"日历价差", en:"Calendar Spread", lv:3, dir:"中性 / 押 IV",
-  legs:[{kind:"call",dir:-1,K:100,prem:PRICE.c100,qty:1},{kind:"call",dir:1,K:100,prem:6.80,qty:1}],
+  legs:[{kind:"call",dir:-1,K:100,prem:PRICE.c100,qty:1,dte:45},{kind:"call",dir:1,K:100,prem:6.80,qty:1,dte:100}],
   meaning:"卖近期、买远期，同一行权价。<b>赚的是「近月比远月衰减得更快」</b>这个时间结构上的差异，同时对远期波动率做多。",
   build:"卖 45 天 100 Call 收 $4.40，买 100 天 100 Call 付 $6.80，净支出 $2.40 × 100 = $240。",
-  profit:"最大盈利出现在近月到期时股价恰好等于行权价，此时近月归零而远月仍有可观时间价值。数值取决于届时的 IV，通常是成本的 50–100%。",
+  profit:"最大盈利出现在近月到期、股价恰好等于行权价时：近月腿归零，远月腿还剩 55 天时间价值。本例按 IV 30% 算约 $254（成本 $240 的 106%），实际数值完全取决于届时的远月 IV。",
   loss:"最大亏损 = 净支出 $240（股价大幅偏离行权价时，两条腿价值趋同）。",
-  be:"两侧各有一个平衡点，随 IV 变化而移动。",
+  be:"两侧各有一个平衡点，本例约 $94.30 与 $107.50，随 IV 变化而移动。",
   when:"（1）预期短期横盘、长期有动作；（2）近月 IV 明显高于远月（期限结构倒挂），比如财报在近月到期日之前。这是少数能<b>同时做多波动率和做多时间</b>的结构。",
-  risk:"注意本页的到期损益图对日历价差<b>不完全适用</b>——因为两条腿到期日不同，真实损益必须用定价模型算。这也是日历价差比垂直价差难管理的原因：你必须理解 Vega。IV 整体下降会直接伤害它。",
+  risk:"上图是<b>近月到期那一刻</b>的损益：近月腿取内在价值，远月腿按剩余 55 天用 Black-Scholes 定价——两条腿到期日不同，不能像垂直价差那样只看内在价值。这也是日历价差比垂直价差难管理的原因：曲线的高度直接由届时的远月 IV 决定，你必须理解 Vega。IV 整体下降会直接伤害它。",
   stockRisk:"不涉及正股。持股者更常用的时间结构是下一条的「穷人的备兑」。",
   example:`<h5>案例 · 财报前的期限结构</h5>
     <p>财报在 30 天后。25 天到期的期权 IV 高达 65%，60 天到期的只有 38%。卖近月、买远月，赚的就是这 27 个点的 IV 差。若财报后 IV 回落到 35%，你的远月腿也会缩水——所以这笔交易真正的要求是：<b>近月 IV 的跌幅要大于远月</b>。</p>`
 },
 {
   id:"pmcc", name:"穷人的备兑（对角价差）", en:"Poor Man's Covered Call / Diagonal", lv:3, dir:"看涨",
-  legs:[{kind:"call",dir:1,K:80,prem:23.50,qty:1},{kind:"call",dir:-1,K:105,prem:PRICE.c105,qty:1}],
+  legs:[{kind:"call",dir:1,K:80,prem:25.87,qty:1,dte:365},{kind:"call",dir:-1,K:105,prem:PRICE.c105,qty:1,dte:45}],
   meaning:"用一张深度价内的长期 Call（LEAPS）<b>代替 100 股正股</b>，然后在它上面反复卖出短期 Call。资金占用只有真实备兑的 1/4，逻辑完全相同。",
-  build:"买 1 年后到期的 80 Call 付 $23.50（Delta ≈ 0.85，占用 $2,350），卖 45 天 105 Call 收 $240。净成本 $2,110，而真实备兑要 $9,760。",
-  profit:"最大盈利 ≈ (105 − 80 − 净成本 21.10) × 100 = $390，加上长期腿剩余的时间价值。资金效率是备兑的 3–4 倍。",
-  loss:"最大亏损 = 净成本 $2,110（股价跌破 $80 时长期腿归零）。注意这是<b>100% 本金亏损</b>，而真实备兑在股价 $80 时只亏 20%。",
-  be:"长期腿的成本决定，约 $101。",
+  build:"买 1 年后到期的 80 Call 付 $25.87（Delta ≈ 0.85，占用 $2,587），卖 45 天 105 Call 收 $240。净成本 $2,347，而真实备兑要 $9,760。",
+  profit:"分两个时点看：<b>近月到期时</b>最大盈利在股价 $105 附近，短期腿刚好归零、长期腿还剩 320 天时间价值，本例约 $604（上图画的就是这一刻）；<b>若一路持到长期腿自己到期</b>，最大盈利 = (105 − 80 − 净成本 23.47) × 100 = $153。两者的差额就是长期腿尚未耗尽的时间价值。资金效率是备兑的 3–4 倍。",
+  loss:"最大亏损 = 净成本 $2,347，在长期腿到期且股价 ≤ $80 时发生。注意这是<b>100% 本金亏损</b>，而真实备兑在股价 $80 时只亏约 18%。",
+  be:"近月到期时约 $98；跌破它长期腿的浮亏就盖过了收到的权利金。",
   when:"（1）资金有限但想执行备兑逻辑；（2）看好标的中长期方向。<b>长期腿必须选 Delta ≥ 0.80、到期 ≥ 9 个月</b>，否则它的 Theta 衰减会超过你收的权利金，整个结构就失效了。",
-  risk:"三个致命细节：① 卖出腿的行权价必须高于「长期腿行权价 + 长期腿成本」，否则最坏情况下是亏的；② 长期腿本身也在衰减，只是慢一些；③ 若短期腿被行权而你的长期腿又不足以覆盖，会产生复杂的头寸调整。<b>没有股息</b>，也没有正股那种「大不了拿着」的退路。",
+  risk:"三个致命细节：① 卖出腿的行权价必须高于「长期腿行权价 + 净成本」（本例 80 + 23.47 = $103.47，所以 $105 才安全），否则短期腿被行权时锁定的是亏损；② 长期腿本身也在衰减，只是慢一些；③ 若短期腿被行权而你的长期腿又不足以覆盖，会产生复杂的头寸调整。<b>没有股息</b>，也没有正股那种「大不了拿着」的退路。",
   stockRisk:"这条恰恰是「没有正股时如何做备兑」。与真正持股的核心差别：正股不会到期归零，LEAPS 会。所以 PMCC 的下行风险<b>比备兑更严重</b>，虽然绝对金额更小。",
   example:`<h5>案例 · 资金效率的代价</h5>
-    <table class="t"><tr><th>股价 $75 时</th><th>真实备兑</th><th>PMCC</th></tr>
-    <tr><td>投入</td><td class="n">$9,760</td><td class="n">$2,110</td></tr>
-    <tr><td>结果</td><td class="n loss">−$2,260（−23%）</td><td class="n loss">−$2,110（−100%）</td></tr>
+    <table class="t"><tr><th>一年后股价 $75</th><th>真实备兑</th><th>PMCC</th></tr>
+    <tr><td>投入</td><td class="n">$9,760</td><td class="n">$2,347</td></tr>
+    <tr><td>结果</td><td class="n loss">−$2,260（−23%）</td><td class="n loss">−$2,347（−100%）</td></tr>
     <tr><td>之后</td><td>继续持股，可等待反弹</td><td>归零出局，没有下一轮</td></tr></table>
-    <p style="margin-top:10px">PMCC 的绝对亏损更小，但<b>它剥夺了你「熬过去」的选项</b>——这是持有正股最被低估的价值。</p>`
+    <p style="margin-top:10px">（备兑一栏按持股一年、期间只计入这一轮权利金简化。）PMCC 的绝对亏损更小，但<b>它剥夺了你「熬过去」的选项</b>——这是持有正股最被低估的价值。</p>`
 },
 {
   id:"leaps", name:"LEAPS 替代正股", en:"LEAPS as Stock Replacement", lv:3, dir:"看涨",
-  legs:[{kind:"call",dir:1,K:80,prem:23.50,qty:1}],
+  legs:[{kind:"call",dir:1,K:80,prem:25.87,qty:1}],
   meaning:"用一张到期一年以上、Delta 0.80+ 的深度价内 Call 代替 100 股股票。<b>用 1/4 的资金拿到 85% 的上涨参与度</b>，同时把下跌风险封在期权成本内。",
-  build:"买入 1 年后到期的 80 Call，付 $23.50（内在价值 $20 + 时间价值 $3.50）。",
+  build:"买入 1 年后到期的 80 Call，付 $25.87（内在价值 $20 + 时间价值 $5.87）。",
   profit:"股价每涨 $1，期权约涨 $0.85（Delta），随着股价上涨 Delta 趋近 1。",
-  loss:"最大亏损 = $2,350，股价 ≤ $80 时全损。",
-  be:"$103.50。",
-  when:"你对标的有 1–3 年的中长期信心，同时希望释放资金做别的事。深度价内 LEAPS 的时间价值占比很低（这里只有 $3.50 / $2,350 = 1.5% 的年化时间成本），是所有做多杠杆里最便宜的一种。",
+  loss:"最大亏损 = $2,587，股价 ≤ $80 时全损。",
+  be:"$105.87。",
+  when:"你对标的有 1–3 年的中长期信心，同时希望释放资金做别的事。深度价内 LEAPS 的持有成本很低：这里一年的时间价值是 $5.87，相当于每年为一股 $100 的股票付 5.9%——而其中 $3.14 只是「晚一年才付出 $80 行权价」省下的利息（80 × (1 − e<sup>−4%</sup>)），真正为波动率付的钱只有约 $2.73。扣掉利息这一层看，它是所有做多杠杆里最便宜的一种。",
   risk:"三件事必须清楚：① <b>没有股息</b>，高股息股票用 LEAPS 替代会损失可观收益；② 有到期日，判断对了方向但时间不够依然归零；③ 流动性差的 LEAPS 买卖价差可能高达 5%，进出成本惊人。",
   stockRisk:"与持有正股的关键差别在心理层面：股票被套可以放着，LEAPS 被套有倒计时。所以用 LEAPS 替代正股时，<b>仓位必须比你原本打算买股票的金额更小</b>，而不是「反正便宜就多买几张」——那是把风险管理工具变成了赌博工具。",
   example:`<h5>案例 · 杠杆的正确用法</h5>
-    <p>你打算投入 $10,000 买 100 股。改成买 4 张 LEAPS（$9,400）是<b>错误示范</b>——那是 4 倍杠杆。<br>正确做法：买 1 张 LEAPS（$2,350），把省下的 $7,650 放在现金或其他资产里。这样你的上涨参与度约等于 85 股，下跌最大亏损 $2,350，同时保有了充足的干火药。<b>杠杆工具用来省资金，不是用来放大仓位。</b></p>`
+    <p>你打算投入 $10,000 买 100 股。改成买 3 张 LEAPS（$7,761）是<b>错误示范</b>——那是 3 倍杠杆。<br>正确做法：买 1 张 LEAPS（$2,587），把省下的 $7,413 放在现金或其他资产里。这样你的上涨参与度约等于 85 股，下跌最大亏损 $2,587，同时保有了充足的干火药。<b>杠杆工具用来省资金，不是用来放大仓位。</b></p>`
 }
 ];
 
@@ -1197,9 +1396,10 @@ function drawHero() {
   $$("#heroChips [data-hero]").forEach(b => b.onclick = () => { heroPick = b.dataset.hero; drawHero(); });
 }
 drawHero();
+onRedraw(drawHero);
 
 /* ================= 时间价值示意图 ================= */
-(() => {
+onRedraw((() => {
   const d1 = [], d2 = [];
   for (let s = 70; s <= 130; s += .5) {
     d1.push([s, bs(s, 100, 45 / 365, .30, .04, "call").price]);
@@ -1212,27 +1412,45 @@ drawHero();
       { name: "内在价值（到期价值）", data: d2, color: "var(--ink)", dash: true }
     ]
   });
-})();
+}))();
 
 /* ================= 希腊字母面板 ================= */
 const GK = { S: 100, K: 100, T: 45, IV: 30, type: "call", tab: "price" };
 const GK_TABS = [["price", "期权价格"], ["delta", "Delta"], ["gamma", "Gamma"], ["theta", "Theta"], ["vega", "Vega"]];
-function gkRender() {
-  $("#gkControls").innerHTML = `
-    <label class="ctrl"><span>股价 <b>$${GK.S}</b></span><input type="range" id="gS" min="60" max="140" step="1" value="${GK.S}"></label>
-    <label class="ctrl"><span>行权价 <b>$${GK.K}</b></span><input type="range" id="gK" min="70" max="130" step="1" value="${GK.K}"></label>
-    <label class="ctrl"><span>剩余天数 <b>${GK.T} 天</b></span><input type="range" id="gT" min="1" max="365" step="1" value="${GK.T}"></label>
-    <label class="ctrl"><span>隐含波动率 <b>${GK.IV}%</b></span><input type="range" id="gV" min="5" max="150" step="1" value="${GK.IV}"></label>
+/* 滑块只构建一次。
+   原来的实现在每次 input 事件里重写整个 #gkControls，正在被拖动的 <input type=range>
+   会连同它的指针捕获一起被替换掉，浏览器随即丢失拖动目标——表现就是「拖一下只动一格就卡住」。
+   拆成「构建一次 + 只更新读数和图」之后，拖动过程中滑块 DOM 始终是同一个节点。 */
+const GK_FIELDS = [
+  ["gS", "S", "股价", 60, 140, 1, v => "$" + v],
+  ["gK", "K", "行权价", 70, 130, 1, v => "$" + v],
+  ["gT", "T", "剩余天数", 1, 365, 1, v => v + " 天"],
+  ["gV", "IV", "隐含波动率", 5, 150, 1, v => v + "%"]
+];
+function gkBuild() {
+  $("#gkControls").innerHTML = GK_FIELDS.map(([id, key, label, min, max, step, disp]) => `
+    <label class="ctrl"><span>${label} <b id="${id}v">${disp(GK[key])}</b></span>
+      <input type="range" id="${id}" min="${min}" max="${max}" step="${step}" value="${GK[key]}"
+             aria-label="${label}"></label>`).join("") + `
     <label class="ctrl"><span>类型</span>
-      <select id="gType"><option value="call"${GK.type === "call" ? " selected" : ""}>看涨 Call</option><option value="put"${GK.type === "put" ? " selected" : ""}>看跌 Put</option></select></label>
-    <div style="display:flex;align-items:flex-end;padding-bottom:12px;font-size:13px;color:var(--ink-soft)">
-      拖动滑块观察：把剩余天数拉到 3 天，看 Gamma 与 Theta 如何暴走。</div>`;
-  ["gS", "gK", "gT", "gV"].forEach(id => $("#" + id).oninput = e => {
-    GK[{ gS: "S", gK: "K", gT: "T", gV: "IV" }[id]] = +e.target.value; gkRender();
+      <select id="gType"><option value="call">看涨 Call</option><option value="put">看跌 Put</option></select></label>
+    <div class="ctrl-hint">拖动滑块观察：把剩余天数拉到 3 天，看 Gamma 与 Theta 如何暴走。</div>`;
+  GK_FIELDS.forEach(([id, key]) => {
+    const el = $("#" + id);
+    el.addEventListener("input", () => { GK[key] = +el.value; gkUpdate(); });
   });
-  $("#gType").onchange = e => { GK.type = e.target.value; gkRender(); };
+  const sel = $("#gType");
+  sel.value = GK.type;
+  sel.addEventListener("change", () => { GK.type = sel.value; gkUpdate(); });
   $("#gkTabs").innerHTML = GK_TABS.map(([k, n]) => `<button class="btn ${GK.tab === k ? "on" : ""}" data-tab="${k}">${n}</button>`).join("");
-  $$("#gkTabs [data-tab]").forEach(b => b.onclick = () => { GK.tab = b.dataset.tab; gkRender(); });
+  $$("#gkTabs [data-tab]").forEach(b => b.onclick = () => {
+    GK.tab = b.dataset.tab;
+    $$("#gkTabs [data-tab]").forEach(x => x.classList.toggle("on", x.dataset.tab === GK.tab));
+    gkUpdate();
+  });
+}
+function gkUpdate() {
+  GK_FIELDS.forEach(([id, key, , , , , disp]) => { $("#" + id + "v").textContent = disp(GK[key]); });
 
   const T = GK.T / 365, v = GK.IV / 100, data = [], now = [];
   for (let s = 60; s <= 140; s += .5) {
@@ -1256,7 +1474,7 @@ function gkRender() {
     <div><b>Theta / 日</b><i class="loss">$${fmt(g.theta, 3)}</i></div>
     <div><b>Vega / 1% IV</b><i>$${fmt(g.vega, 3)}</i></div>`;
 }
-gkRender();
+gkBuild(); gkUpdate(); onRedraw(gkUpdate);
 
 /* ================= 损益实验室 ================= */
 let LAB = { S: 100, T: 45, IV: 30, legs: JSON.parse(JSON.stringify(byId("covered-call").legs)) };
@@ -1265,8 +1483,10 @@ $$("#labPresets [data-p]").forEach(b => b.onclick = () => {
   LAB.legs = JSON.parse(JSON.stringify(byId(b.dataset.p).legs));
   $$("#labPresets .btn").forEach(x => x.classList.remove("on")); b.classList.add("on"); labRender();
 });
-["labS", "labT", "labIV"].forEach(id => $("#" + id).oninput = e => {
-  LAB[{ labS: "S", labT: "T", labIV: "IV" }[id]] = +e.target.value; labRender();
+["labS", "labT", "labIV"].forEach(id => {
+  const el = $("#" + id);
+  // 与希腊字母面板同理：拖动时只更新读数与图，不重建腿的 DOM
+  el.addEventListener("input", () => { LAB[{ labS: "S", labT: "T", labIV: "IV" }[id]] = +el.value; labUpdate(); });
 });
 $$("#lab [data-add]").forEach(b => b.onclick = () => {
   const a = b.dataset.add;
@@ -1278,31 +1498,40 @@ $$("#lab [data-add]").forEach(b => b.onclick = () => {
   else LAB.legs.push({ kind: "call", dir: 1, K: Math.round(LAB.S), prem: +bs(LAB.S, Math.round(LAB.S), LAB.T / 365, LAB.IV / 100, .04, "call").price.toFixed(2), qty: 1 });
   labRender();
 });
-function labRender() {
-  $("#labSv").textContent = "$" + LAB.S; $("#labTv").textContent = LAB.T + " 天"; $("#labIVv").textContent = LAB.IV + "%";
+/* 只有增删腿或改变腿的类型时才重建这块 DOM；改数字时原地更新，输入焦点不会丢 */
+function labBuildLegs() {
   $("#labLegs").innerHTML = LAB.legs.map((l, i) => `
-    <div class="leg-row">
-      <select data-i="${i}" data-f="dir"><option value="1"${l.dir === 1 ? " selected" : ""}>买入</option><option value="-1"${l.dir === -1 ? " selected" : ""}>卖出</option></select>
-      <select data-i="${i}" data-f="kind">
+    <div class="leg-row" data-label="第 ${i + 1} 条腿">
+      <label class="lf"><b>方向</b><select data-i="${i}" data-f="dir" aria-label="方向"><option value="1"${l.dir === 1 ? " selected" : ""}>买入</option><option value="-1"${l.dir === -1 ? " selected" : ""}>卖出</option></select></label>
+      <label class="lf"><b>类型</b><select data-i="${i}" data-f="kind" aria-label="类型">
         <option value="call"${l.kind === "call" ? " selected" : ""}>Call</option>
         <option value="put"${l.kind === "put" ? " selected" : ""}>Put</option>
-        <option value="stock"${l.kind === "stock" ? " selected" : ""}>正股</option></select>
-      <input type="number" step="0.5" data-i="${i}" data-f="K" value="${l.K}">
-      <input type="number" step="0.05" data-i="${i}" data-f="prem" value="${l.prem}" ${l.kind === "stock" ? "disabled" : ""}>
-      <input type="number" step="1" min="1" data-i="${i}" data-f="qty" value="${l.qty}">
-      <button class="xbtn" data-del="${i}" aria-label="删除这条腿">×</button>
+        <option value="stock"${l.kind === "stock" ? " selected" : ""}>正股</option></select></label>
+      <label class="lf"><b>${l.kind === "stock" ? "建仓成本" : "行权价"}</b><input type="number" inputmode="decimal" step="0.5" data-i="${i}" data-f="K" value="${l.K}" aria-label="${l.kind === "stock" ? "建仓成本" : "行权价"}"></label>
+      <label class="lf"><b>权利金</b><input type="number" inputmode="decimal" step="0.05" data-i="${i}" data-f="prem" value="${l.prem}" ${l.kind === "stock" ? "disabled" : ""} aria-label="权利金"></label>
+      <label class="lf"><b>${l.kind === "stock" ? "份数 ×100 股" : "张数"}</b><input type="number" inputmode="numeric" step="1" min="1" data-i="${i}" data-f="qty" value="${l.qty}" aria-label="数量"></label>
+      <button class="xbtn" data-del="${i}" aria-label="删除第 ${i + 1} 条腿">×</button>
     </div>`).join("") || `<p style="color:var(--ink-faint);font-size:14px;margin:4px 0">还没有头寸。点上面的预设，或用下面的按钮添加。</p>`;
-  $$("#labLegs [data-f]").forEach(el => el.onchange = e => {
-    const l = LAB.legs[+e.target.dataset.i], f = e.target.dataset.f;
-    l[f] = f === "kind" ? e.target.value : +e.target.value;
-    if (f === "kind" && l.kind === "stock") { l.prem = 0; l.K = LAB.S; }
-    if (f === "kind" && l.kind !== "stock") l.prem = +bs(LAB.S, l.K, LAB.T / 365, LAB.IV / 100, .04, l.kind).price.toFixed(2);
-    labRender();
-  });
-  $$("#labLegs [data-del]").forEach(el => el.onclick = e => { LAB.legs.splice(+e.target.dataset.del, 1); labRender(); });
+  $$("#labLegs [data-f]").forEach(el => el.addEventListener("change", () => {
+    const l = LAB.legs[+el.dataset.i], f = el.dataset.f;
+    if (f === "kind") {
+      l.kind = el.value;
+      if (l.kind === "stock") { l.prem = 0; l.K = LAB.S; }
+      else l.prem = +bs(LAB.S, l.K, LAB.T / 365, LAB.IV / 100, .04, l.kind).price.toFixed(2);
+      labRender();                       // 类型变了，这一行的输入框需要重建
+    } else { l[f] = +el.value; labUpdate(); }
+  }));
+  $$("#labLegs [data-del]").forEach(el => el.addEventListener("click", () => {
+    LAB.legs.splice(+el.dataset.del, 1); labRender();
+  }));
+}
+function labUpdate() {
+  $("#labSv").textContent = "$" + LAB.S; $("#labTv").textContent = LAB.T + " 天"; $("#labIVv").textContent = LAB.IV + "%";
   payoffChart($("#labChart"), { legs: LAB.legs, S0: LAB.S, T: LAB.T / 365, iv: LAB.IV / 100, h: 340, span: .5 });
 }
+function labRender() { labBuildLegs(); labUpdate(); }
 labRender();
+onRedraw(labUpdate);
 
 /* ================= 策略库 ================= */
 const LEVELS = [["all", "全部"], ["1", "入门"], ["2", "进阶"], ["3", "高级"]];
@@ -1360,9 +1589,13 @@ $$(".strat-head").forEach(h => {
   h.onclick = toggle;
   h.onkeydown = e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); toggle(); } };
 });
+onRedraw(() => $$(".strat.open").forEach(art => {
+  const s = byId(art.dataset.id);
+  payoffChart(art.querySelector(".chart-slot"), { legs: s.legs, S0, T: 45 / 365, iv: .30, h: 280, span: .42 });
+}));
 
 /* ================= Theta 衰减曲线 ================= */
-(() => {
+onRedraw((() => {
   const atm = [], otm = [];
   for (let d = 120; d >= 0; d -= 1) {
     atm.push([d, bs(100, 100, d / 365, .30, .04, "call").price]);
@@ -1375,7 +1608,7 @@ $$(".strat-head").forEach(h => {
       { name: "虚值 Call（K=105）", data: otm, color: "var(--amber)" }
     ]
   });
-})();
+}))();
 
 /* ================= 备兑计算器 ================= */
 const CC = ["ccCost", "ccSpot", "ccK", "ccPrem", "ccDTE", "ccShares"];
@@ -1386,7 +1619,10 @@ function ccCalc() {
   const staticR = prem / spot, staticA = Math.pow(1 + staticR, 365 / dte) - 1;
   const calledGain = (K - cost + prem) * ct * 100, calledR = (K - cost + prem) / cost, calledA = Math.pow(1 + Math.max(calledR, -0.99), 365 / dte) - 1;
   const beven = cost - prem, protect = prem / spot, upside = (K - spot) / spot;
-  const d = bs(spot, K, dte / 365, .30, .04, "call").delta;
+  // 用输入的权利金反解 IV，再据此算 Delta——写死 30% 会让概率与账本对不上；
+  // 权利金落在无套利区间之外时无解，退回 30% 并标注。
+  const iv = impliedVol(prem, spot, K, dte / 365, .04, "call");
+  const d = bs(spot, K, dte / 365, iv ?? .30, .04, "call").delta;
 
   $("#ccOut").innerHTML = `
     <tr><th colspan="2">这笔交易的账本</th></tr>
@@ -1397,7 +1633,8 @@ function ccCalc() {
     <tr><td>盈亏平衡股价</td><td class="n">$${fmt(beven)}</td></tr>
     <tr><td>下行缓冲</td><td class="n">${pct(protect, 2)}　<span style="color:var(--ink-faint)">仅此而已，不是保护</span></td></tr>
     <tr><td>让渡的上涨空间</td><td class="n">${upside >= 0 ? pct(upside, 2) : `<span class="loss">${pct(upside, 2)}（已价内）</span>`}</td></tr>
-    <tr><td>估算被行权概率（Delta）</td><td class="n">${pct(d, 0)}</td></tr>`;
+    <tr><td>反解隐含波动率</td><td class="n">${iv === null ? `<span class="loss">权利金超出无套利区间</span>` : pct(iv, 1)}</td></tr>
+    <tr><td>估算被行权概率（Delta）</td><td class="n">${pct(d, 0)}${iv === null ? `　<span style="color:var(--ink-faint)">按 IV 30% 估算</span>` : ""}</td></tr>`;
 
   const w = [];
   if (K < cost) w.push(`行权价 $${fmt(K)} 低于持股成本 $${fmt(cost)}。被行权将<b>锁定亏损</b>，这通常是错误的备兑用法。`);
@@ -1411,11 +1648,16 @@ function ccCalc() {
 
   payoffChart($("#ccChart"), {
     legs: [{ kind: "stock", dir: 1, K: cost, prem: 0, qty: ct }, { kind: "call", dir: -1, K, prem, qty: ct }],
-    S0: spot, T: dte / 365, iv: .30, h: 300, span: .4
+    S0: spot, T: dte / 365, iv: iv ?? .30, h: 300, span: .4
   });
 }
-CC.forEach(id => $("#" + id).oninput = ccCalc);
+CC.forEach(id => {
+  const el = $("#" + id);
+  el.setAttribute("inputmode", "decimal");
+  el.addEventListener("input", ccCalc);
+});
 ccCalc();
+onRedraw(ccCalc);
 
 /* ================= 自测 ================= */
 $("#quizList").innerHTML = QUIZ.map((q, i) => `
@@ -1435,6 +1677,31 @@ $$(".q").forEach(box => {
     });
   });
 });
+
+/* ================= 移动端收尾 ================= */
+/* 例子里的表格列多，窄屏放不下：套一层可横向滚动的壳，避免整页被撑出横向滚动条 */
+function wrapTables(root) {
+  (root || document).querySelectorAll("table.t").forEach(t => {
+    if (t.parentElement.classList.contains("tablewrap")) return;
+    const w = document.createElement("div");
+    w.className = "tablewrap";
+    t.replaceWith(w); w.appendChild(t);
+  });
+}
+wrapTables();
+// 策略卡片展开后才插入内容，这里补一次
+$$(".strat-head").forEach(h => h.addEventListener("click", () => wrapTables(h.parentElement), true));
+
+/* 跨过 640px 断点时，图的画布尺寸与字号要换一套，重画一遍已渲染的图 */
+let wasNarrow = isNarrow();
+const relayout = () => {
+  if (isNarrow() === wasNarrow) return;
+  wasNarrow = isNarrow();
+  REDRAW.forEach(fn => fn());
+  wrapTables();
+};
+if (NARROW_Q.addEventListener) NARROW_Q.addEventListener("change", relayout);
+else NARROW_Q.addListener(relayout);
 
 /* ================= 导航高亮 ================= */
 const links = $$("#topnav a");
