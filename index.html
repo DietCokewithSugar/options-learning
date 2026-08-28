@@ -1,0 +1,1452 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>期权工作台 · Options Lab</title>
+<style>
+:root{
+  --paper:#EBEEF1;
+  --paper-2:#F6F8F9;
+  --grid:#D8DEE4;
+  --grid-strong:#C2CBD4;
+  --ink:#131A22;
+  --ink-soft:#5A6673;
+  --ink-faint:#8B95A1;
+  --accent:#1F4B8E;
+  --accent-soft:#E2E9F4;
+  --gain:#147D64;
+  --gain-soft:rgba(20,125,100,.14);
+  --loss:#B4402F;
+  --loss-soft:rgba(180,64,47,.14);
+  --amber:#B07813;
+  --amber-soft:#FAF0DC;
+  --rule:#CBD3DB;
+  --display:"Songti SC","STSong","Noto Serif SC","SimSun",Georgia,serif;
+  --body:"PingFang SC","Hiragino Sans GB","Microsoft YaHei",system-ui,-apple-system,sans-serif;
+  --mono:"SF Mono","JetBrains Mono","Roboto Mono",Consolas,"Courier New",monospace;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;background:var(--paper);color:var(--ink);font-family:var(--body);
+  font-size:15px;line-height:1.75;-webkit-font-smoothing:antialiased;
+  background-image:
+    linear-gradient(var(--grid) 1px,transparent 1px),
+    linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+  background-size:28px 28px;
+}
+.wrap{max-width:1180px;margin:0 auto;padding:0 24px}
+
+/* ---------- 顶栏 ---------- */
+header.top{
+  position:sticky;top:0;z-index:60;
+  background:rgba(235,238,241,.92);backdrop-filter:blur(8px);
+  border-bottom:1px solid var(--rule);
+}
+.top-in{display:flex;align-items:center;gap:18px;height:56px}
+.brand{font-family:var(--display);font-size:19px;font-weight:600;letter-spacing:.04em;white-space:nowrap}
+.brand span{font-family:var(--mono);font-size:10px;color:var(--ink-faint);letter-spacing:.18em;margin-left:8px}
+nav.top-nav{display:flex;gap:2px;overflow-x:auto;flex:1;scrollbar-width:none}
+nav.top-nav::-webkit-scrollbar{display:none}
+nav.top-nav a{
+  font-family:var(--mono);font-size:11px;letter-spacing:.06em;color:var(--ink-soft);
+  text-decoration:none;padding:6px 10px;border-radius:3px;white-space:nowrap;
+}
+nav.top-nav a:hover{background:var(--accent-soft);color:var(--accent)}
+nav.top-nav a.on{background:var(--accent);color:#fff}
+
+/* ---------- HERO ---------- */
+.hero{padding:64px 0 40px;border-bottom:1px solid var(--rule)}
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.22em;color:var(--accent);text-transform:uppercase}
+.hero h1{font-family:var(--display);font-size:clamp(34px,6vw,60px);line-height:1.14;margin:14px 0 18px;font-weight:600;letter-spacing:.01em}
+.hero h1 em{font-style:normal;border-bottom:3px solid var(--amber);padding-bottom:2px}
+.hero p{max-width:62ch;color:var(--ink-soft);font-size:16px;margin:0 0 26px}
+.hero-figure{
+  background:var(--paper-2);border:1px solid var(--rule);border-radius:4px;padding:0;
+  box-shadow:0 1px 0 rgba(19,26,34,.05);
+}
+.fig-head{
+  display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;
+  padding:12px 16px;border-bottom:1px solid var(--rule);
+}
+.fig-title{font-family:var(--mono);font-size:11px;letter-spacing:.14em;color:var(--ink-soft);text-transform:uppercase}
+.stat-row{display:flex;flex-wrap:wrap;gap:0;border-top:1px solid var(--rule)}
+.stat{flex:1;min-width:130px;padding:12px 16px;border-right:1px solid var(--rule)}
+.stat:last-child{border-right:none}
+.stat b{display:block;font-family:var(--mono);font-size:10px;letter-spacing:.12em;color:var(--ink-faint);font-weight:400;text-transform:uppercase}
+.stat i{font-style:normal;font-family:var(--mono);font-size:17px;font-weight:600}
+
+/* ---------- 通用区块 ---------- */
+section.chapter{padding:56px 0;border-bottom:1px solid var(--rule)}
+.ch-head{display:flex;align-items:baseline;gap:14px;margin-bottom:8px;flex-wrap:wrap}
+.ch-num{font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:#fff;background:var(--ink);padding:3px 8px;border-radius:2px}
+.ch-head h2{font-family:var(--display);font-size:clamp(24px,3.4vw,34px);margin:0;font-weight:600}
+.ch-sub{color:var(--ink-soft);max-width:70ch;margin:0 0 30px}
+
+.card{background:var(--paper-2);border:1px solid var(--rule);border-radius:4px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.pad{padding:18px 20px}
+h4.mini{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin:0 0 8px}
+p.tight{margin:0 0 10px}
+ul.tick{margin:0;padding-left:0;list-style:none}
+ul.tick li{position:relative;padding-left:18px;margin-bottom:7px}
+ul.tick li::before{content:"—";position:absolute;left:0;color:var(--ink-faint);font-family:var(--mono)}
+.kbd{font-family:var(--mono);font-size:12px;background:var(--accent-soft);color:var(--accent);padding:1px 6px;border-radius:2px}
+.num{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.gain{color:var(--gain)} .loss{color:var(--loss)} .amberc{color:var(--amber)}
+.note{background:var(--amber-soft);border-left:3px solid var(--amber);padding:12px 16px;border-radius:0 3px 3px 0;margin:16px 0;font-size:14px}
+.warn{background:var(--loss-soft);border-left:3px solid var(--loss);padding:12px 16px;border-radius:0 3px 3px 0;margin:16px 0;font-size:14px}
+
+table.t{width:100%;border-collapse:collapse;font-size:14px}
+table.t th{
+  font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--ink-faint);font-weight:400;text-align:left;padding:8px 12px;border-bottom:1px solid var(--grid-strong);
+}
+table.t td{padding:9px 12px;border-bottom:1px solid var(--grid);vertical-align:top}
+table.t tr:last-child td{border-bottom:none}
+table.t td.n{font-family:var(--mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+
+/* ---------- 控件 ---------- */
+label.ctrl{display:block;margin-bottom:12px}
+label.ctrl span{
+  display:flex;justify-content:space-between;font-family:var(--mono);font-size:10px;
+  letter-spacing:.1em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:4px;
+}
+label.ctrl span b{color:var(--ink);font-weight:600;font-size:12px}
+input[type=range]{width:100%;accent-color:var(--accent);height:20px}
+input[type=number],input[type=text],select{
+  width:100%;font-family:var(--mono);font-size:13px;padding:6px 8px;
+  border:1px solid var(--rule);border-radius:3px;background:#fff;color:var(--ink);
+}
+input:focus-visible,select:focus-visible,button:focus-visible,a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+button.btn{
+  font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;
+  padding:7px 12px;border:1px solid var(--rule);background:#fff;color:var(--ink-soft);
+  border-radius:3px;cursor:pointer;transition:.15s;
+}
+button.btn:hover{border-color:var(--accent);color:var(--accent)}
+button.btn.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.chipbar{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
+
+/* ---------- 策略库 ---------- */
+.filterbar{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:22px;align-items:center}
+.filterbar em{font-family:var(--mono);font-size:10px;letter-spacing:.12em;color:var(--ink-faint);font-style:normal;margin-right:4px;text-transform:uppercase}
+.strat{border:1px solid var(--rule);background:var(--paper-2);border-radius:4px;margin-bottom:14px;overflow:hidden}
+.strat-head{display:flex;align-items:center;gap:14px;padding:14px 18px;cursor:pointer;user-select:none}
+.strat-head:hover{background:#fff}
+.strat-idx{font-family:var(--mono);font-size:11px;color:var(--ink-faint);width:26px;flex:none}
+.strat-name{font-family:var(--display);font-size:19px;font-weight:600;flex:none}
+.strat-en{font-family:var(--mono);font-size:11px;color:var(--ink-faint);letter-spacing:.06em;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tag{font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;padding:2px 7px;border-radius:2px;white-space:nowrap;text-transform:uppercase}
+.tag.lv1{background:#E4EFE9;color:#147D64}
+.tag.lv2{background:#FAF0DC;color:#8A5E0F}
+.tag.lv3{background:#F7E2DE;color:#933524}
+.tag.dir{background:var(--accent-soft);color:var(--accent)}
+.strat-body{display:none;border-top:1px solid var(--rule);padding:20px}
+.strat.open .strat-body{display:block}
+.strat.open .strat-head{background:#fff;border-bottom:0}
+.twocol{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.05fr);gap:24px}
+.legs{font-family:var(--mono);font-size:12.5px;background:#fff;border:1px solid var(--rule);border-radius:3px;padding:10px 12px;margin-bottom:14px}
+.legs div{padding:2px 0}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;font-size:14px;margin-bottom:14px}
+.kv dt{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-faint);padding-top:4px}
+.kv dd{margin:0}
+.example{background:#fff;border:1px dashed var(--grid-strong);border-radius:3px;padding:14px 16px;font-size:14px;margin-top:6px}
+.example h5{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--amber);margin:0 0 8px}
+
+/* ---------- 图 ---------- */
+.chartbox{background:#fff;border:1px solid var(--rule);border-radius:3px;padding:6px}
+svg.payoff{display:block;width:100%;height:auto;touch-action:pan-y}
+.legend{display:flex;gap:16px;flex-wrap:wrap;font-family:var(--mono);font-size:10px;color:var(--ink-soft);padding:6px 8px 2px;letter-spacing:.06em}
+.legend i{display:inline-block;width:16px;height:2px;vertical-align:middle;margin-right:5px}
+.readout{display:flex;flex-wrap:wrap;border-top:1px solid var(--rule);margin-top:8px}
+.readout div{flex:1;min-width:96px;padding:8px 10px;border-right:1px solid var(--rule)}
+.readout div:last-child{border-right:none}
+.readout b{display:block;font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;color:var(--ink-faint);text-transform:uppercase;font-weight:400}
+.readout i{font-style:normal;font-family:var(--mono);font-size:15px;font-weight:600}
+
+/* ---------- builder ---------- */
+.leg-row{display:grid;grid-template-columns:60px 66px 1fr 1fr 54px 28px;gap:6px;align-items:center;margin-bottom:6px}
+.leg-row .lbl{font-family:var(--mono);font-size:9px;color:var(--ink-faint);letter-spacing:.08em;text-transform:uppercase}
+.xbtn{border:none;background:none;color:var(--ink-faint);cursor:pointer;font-size:16px;line-height:1;padding:4px}
+.xbtn:hover{color:var(--loss)}
+
+/* ---------- quiz ---------- */
+.q{border:1px solid var(--rule);background:var(--paper-2);border-radius:4px;padding:16px 18px;margin-bottom:12px}
+.q p.qs{margin:0 0 12px;font-weight:600}
+.opt{display:block;width:100%;text-align:left;padding:9px 12px;margin-bottom:6px;border:1px solid var(--rule);
+  background:#fff;border-radius:3px;cursor:pointer;font-family:var(--body);font-size:14px;color:var(--ink)}
+.opt:hover{border-color:var(--accent)}
+.opt.right{border-color:var(--gain);background:var(--gain-soft)}
+.opt.wrong{border-color:var(--loss);background:var(--loss-soft)}
+.exp{display:none;font-size:13.5px;color:var(--ink-soft);border-left:3px solid var(--accent);padding-left:12px;margin-top:10px}
+.q.done .exp{display:block}
+
+footer{padding:40px 0 60px;color:var(--ink-faint);font-size:13px}
+footer .disc{font-family:var(--mono);font-size:11px;line-height:1.9;letter-spacing:.02em}
+
+@media(max-width:860px){
+  .grid2,.grid3,.twocol{grid-template-columns:1fr}
+  .leg-row{grid-template-columns:56px 60px 1fr 1fr 48px 24px}
+  .hero{padding:40px 0 30px}
+  section.chapter{padding:40px 0}
+}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap top-in">
+    <div class="brand">期权工作台<span>OPTIONS LAB</span></div>
+    <nav class="top-nav" id="topnav">
+      <a href="#basics">基础</a>
+      <a href="#greeks">希腊字母</a>
+      <a href="#lab">损益实验室</a>
+      <a href="#strategies">策略库</a>
+      <a href="#cc">备兑手册</a>
+      <a href="#risk">风险</a>
+      <a href="#cases">案例</a>
+      <a href="#quiz">自测</a>
+    </nav>
+  </div>
+</header>
+
+<div class="hero wrap">
+  <div class="eyebrow">从合约要素到 18 种结构 · 每一页都能拖</div>
+  <h1>期权不是赌方向，<br>是给<em>概率分布</em>定价。</h1>
+  <p>这个工作台把期权拆成三件事：你买卖的是什么结构、这个结构在哪些股价下赚钱、以及时间和波动率会怎么改变它。所有损益图都可以直接拖动——改行权价、改权利金、改剩余天数，图形会实时重画。先从下面这张图开始：拖一拖，看看备兑开仓的形状是怎么来的。</p>
+
+  <div class="hero-figure">
+    <div class="fig-head">
+      <div class="fig-title">Payoff · 实时结构图</div>
+      <div class="chipbar" style="margin:0" id="heroChips"></div>
+    </div>
+    <div style="padding:8px 10px"><div id="heroChart"></div></div>
+    <div class="stat-row" id="heroStats"></div>
+  </div>
+</div>
+
+<main id="content"></main>
+
+<footer class="wrap">
+  <div class="disc">
+    风险提示 / DISCLAIMER<br>
+    本页面所有数字均为教学用的虚构示例，不构成投资建议。<br>
+    期权卖方的潜在亏损可能远大于收到的权利金；裸卖看涨期权的理论亏损无上限。<br>
+    真实交易还需考虑手续费、买卖价差、保证金要求、提前指派与税务，本页均已简化。
+  </div>
+</footer>
+
+<script>
+/* ================= 数学与定价 ================= */
+const M = 100;                     // 每张合约对应 100 股
+const fmt = (n, d = 2) => (n === Infinity ? "∞" : n === -Infinity ? "-∞" : n.toLocaleString("en-US", { minimumFractionDigits: d, maximumFractionDigits: d }));
+const usd = (n, d = 0) => (n >= 0 ? "$" : "-$") + fmt(Math.abs(n), d);
+const pct = (n, d = 1) => fmt(n * 100, d) + "%";
+
+function ndf(x) { return Math.exp(-x * x / 2) / Math.sqrt(2 * Math.PI); }
+function N(x) {
+  const a1 = .254829592, a2 = -.284496736, a3 = 1.421413741, a4 = -1.453152027, a5 = 1.061405429, p = .3275911;
+  const s = x < 0 ? -1 : 1; x = Math.abs(x) / Math.SQRT2;
+  const t = 1 / (1 + p * x);
+  const y = 1 - ((((a5 * t + a4) * t + a3) * t + a2) * t + a1) * t * Math.exp(-x * x);
+  return .5 * (1 + s * y);
+}
+/* Black-Scholes：返回价格与希腊字母（theta 为每日，vega 为每 1 个 IV 百分点） */
+function bs(S, K, T, v, r, type) {
+  if (T <= 0 || v <= 0) {
+    const iv = type === "call" ? Math.max(S - K, 0) : Math.max(K - S, 0);
+    return { price: iv, delta: type === "call" ? (S > K ? 1 : 0) : (S < K ? -1 : 0), gamma: 0, theta: 0, vega: 0 };
+  }
+  const sq = Math.sqrt(T), disc = Math.exp(-r * T);
+  const d1 = (Math.log(S / K) + (r + v * v / 2) * T) / (v * sq), d2 = d1 - v * sq;
+  let price, delta, theta;
+  if (type === "call") {
+    price = S * N(d1) - K * disc * N(d2); delta = N(d1);
+    theta = (-S * ndf(d1) * v / (2 * sq) - r * K * disc * N(d2)) / 365;
+  } else {
+    price = K * disc * N(-d2) - S * N(-d1); delta = N(d1) - 1;
+    theta = (-S * ndf(d1) * v / (2 * sq) + r * K * disc * N(-d2)) / 365;
+  }
+  return { price, delta, gamma: ndf(d1) / (S * v * sq), theta, vega: S * ndf(d1) * sq / 100 };
+}
+
+/* ================= 损益计算 ================= */
+/* leg: {kind:'call'|'put'|'stock', dir:1|-1, K, prem, qty} —— stock 腿的 K 表示建仓成本，qty 表示 100 股的份数 */
+function payoffExp(legs, S) {
+  let v = 0;
+  for (const l of legs) {
+    const q = l.dir * l.qty * M;
+    if (l.kind === "stock") v += q * (S - l.K);
+    else if (l.kind === "call") v += q * (Math.max(S - l.K, 0) - l.prem);
+    else v += q * (Math.max(l.K - S, 0) - l.prem);
+  }
+  return v;
+}
+function payoffNow(legs, S, T, iv, r) {
+  let v = 0;
+  for (const l of legs) {
+    const q = l.dir * l.qty * M;
+    if (l.kind === "stock") v += q * (S - l.K);
+    else v += q * (bs(S, l.K, T, iv, r, l.kind).price - l.prem);
+  }
+  return v;
+}
+function metrics(legs, S0) {
+  const hi = Math.max(S0 * 4, 20), pts = [];
+  for (let i = 0; i <= 2000; i++) { const s = hi * i / 2000; pts.push([s, payoffExp(legs, s)]); }
+  let maxP = -Infinity, maxL = Infinity;
+  for (const [, y] of pts) { maxP = Math.max(maxP, y); maxL = Math.min(maxL, y); }
+  // 上行是否无界：股价 → ∞ 时的斜率
+  let slopeUp = 0;
+  for (const l of legs) { if (l.kind === "call" || l.kind === "stock") slopeUp += l.dir * l.qty; }
+  if (slopeUp > 0) maxP = Infinity;
+  if (slopeUp < 0) maxL = -Infinity;
+  const be = [];
+  for (let i = 1; i < pts.length; i++) {
+    const [x0, y0] = pts[i - 1], [x1, y1] = pts[i];
+    if ((y0 < 0 && y1 >= 0) || (y0 > 0 && y1 <= 0)) be.push(x0 + (x1 - x0) * (-y0) / (y1 - y0));
+  }
+  return { maxP, maxL, be, net: legs.reduce((a, l) => a + (l.kind === "stock" ? 0 : -l.dir * l.qty * l.prem * M), 0) };
+}
+
+/* ================= SVG 损益图 ================= */
+let uid = 0;
+function payoffChart(host, cfg) {
+  const o = Object.assign({ legs: [], S0: 100, T: 45 / 365, iv: .30, r: .04, showTheo: true, span: .45, readout: true, h: 300 }, cfg);
+  const id = "c" + (++uid);
+  const W = 720, H = o.h, mL = 54, mR = 16, mT = 14, mB = 30;
+  const iw = W - mL - mR, ih = H - mT - mB;
+  const xmin = Math.max(0.01, o.S0 * (1 - o.span)), xmax = o.S0 * (1 + o.span);
+
+  const xs = [], yE = [], yN = [];
+  for (let i = 0; i <= 240; i++) {
+    const s = xmin + (xmax - xmin) * i / 240;
+    xs.push(s); yE.push(payoffExp(o.legs, s));
+    if (o.showTheo) yN.push(payoffNow(o.legs, s, o.T, o.iv, o.r));
+  }
+  const all = o.showTheo ? yE.concat(yN) : yE;
+  let lo = Math.min(...all), hi = Math.max(...all);
+  const padY = Math.max((hi - lo) * .16, 40); lo -= padY; hi += padY;
+  if (lo > 0) lo = -padY; if (hi < 0) hi = padY;
+
+  const X = s => mL + (s - xmin) / (xmax - xmin) * iw;
+  const Y = v => mT + (hi - v) / (hi - lo) * ih;
+  const y0 = Y(0);
+  const path = arr => arr.map((v, i) => (i ? "L" : "M") + X(xs[i]).toFixed(1) + " " + Y(v).toFixed(1)).join(" ");
+  const area = path(yE) + ` L ${X(xmax).toFixed(1)} ${y0.toFixed(1)} L ${X(xmin).toFixed(1)} ${y0.toFixed(1)} Z`;
+
+  // 网格刻度
+  let grid = "", xticks = "", yticks = "";
+  const step = niceStep((xmax - xmin) / 6);
+  for (let s = Math.ceil(xmin / step) * step; s <= xmax; s += step) {
+    grid += `<line x1="${X(s)}" y1="${mT}" x2="${X(s)}" y2="${mT + ih}" stroke="var(--grid)" stroke-width="1"/>`;
+    xticks += `<text x="${X(s)}" y="${mT + ih + 18}" text-anchor="middle" class="ax">${Math.round(s)}</text>`;
+  }
+  const vstep = niceStep((hi - lo) / 5);
+  for (let v = Math.ceil(lo / vstep) * vstep; v <= hi; v += vstep) {
+    grid += `<line x1="${mL}" y1="${Y(v)}" x2="${mL + iw}" y2="${Y(v)}" stroke="var(--grid)" stroke-width="1"/>`;
+    yticks += `<text x="${mL - 8}" y="${Y(v) + 4}" text-anchor="end" class="ax">${v === 0 ? "0" : (v >= 0 ? "" : "-") + "$" + fmt(Math.abs(v), 0)}</text>`;
+  }
+  // 行权价竖线
+  let kl = "";
+  for (const l of o.legs) if (l.kind !== "stock" && l.K > xmin && l.K < xmax)
+    kl += `<line x1="${X(l.K)}" y1="${mT}" x2="${X(l.K)}" y2="${mT + ih}" stroke="var(--accent)" stroke-width="1" stroke-dasharray="2 4" opacity=".5"/>`;
+
+  const m = metrics(o.legs, o.S0);
+  let bem = "";
+  for (const b of m.be) if (b > xmin && b < xmax)
+    bem += `<circle cx="${X(b)}" cy="${y0}" r="4" fill="var(--paper-2)" stroke="var(--ink)" stroke-width="1.5"/>`;
+
+  host.innerHTML = `
+  <div class="chartbox">
+    <svg class="payoff" viewBox="0 0 ${W} ${H}" role="img" aria-label="损益结构图">
+      <style>.ax{font-family:var(--mono);font-size:10px;fill:var(--ink-faint)}</style>
+      <defs>
+        <clipPath id="up${id}"><rect x="${mL}" y="${mT}" width="${iw}" height="${Math.max(0, y0 - mT)}"/></clipPath>
+        <clipPath id="dn${id}"><rect x="${mL}" y="${y0}" width="${iw}" height="${Math.max(0, mT + ih - y0)}"/></clipPath>
+      </defs>
+      ${grid}
+      <path d="${area}" fill="var(--gain)" opacity=".16" clip-path="url(#up${id})"/>
+      <path d="${area}" fill="var(--loss)" opacity=".16" clip-path="url(#dn${id})"/>
+      ${kl}
+      <line x1="${mL}" y1="${y0}" x2="${mL + iw}" y2="${y0}" stroke="var(--ink-soft)" stroke-width="1.2"/>
+      ${o.showTheo ? `<path d="${path(yN)}" fill="none" stroke="var(--accent)" stroke-width="1.6" stroke-dasharray="5 4"/>` : ""}
+      <path d="${path(yE)}" fill="none" stroke="var(--ink)" stroke-width="2.4" stroke-linejoin="round"/>
+      <line x1="${X(o.S0)}" y1="${mT}" x2="${X(o.S0)}" y2="${mT + ih}" stroke="var(--amber)" stroke-width="1.4"/>
+      ${bem}
+      <g id="cross${id}" style="display:none">
+        <line y1="${mT}" y2="${mT + ih}" stroke="var(--ink)" stroke-width="1" stroke-dasharray="3 3"/>
+        <circle r="4.5" fill="var(--ink)"/>
+      </g>
+      <rect x="${mL}" y="${mT}" width="${iw}" height="${ih}" fill="transparent" id="hit${id}"/>
+      ${xticks}${yticks}
+    </svg>
+    <div class="legend">
+      <span><i style="background:var(--ink)"></i>到期损益</span>
+      ${o.showTheo ? `<span><i style="background:var(--accent)"></i>当前理论损益（还有 ${Math.round(o.T * 365)} 天）</span>` : ""}
+      <span><i style="background:var(--amber)"></i>当前股价 ${usd(o.S0, 2)}</span>
+      <span>○ 盈亏平衡</span>
+    </div>
+  </div>
+  ${o.readout ? `<div class="readout">
+      <div><b>最大盈利</b><i class="gain">${m.maxP === Infinity ? "无上限" : usd(m.maxP)}</i></div>
+      <div><b>最大亏损</b><i class="loss">${m.maxL === -Infinity ? "无下限" : usd(m.maxL)}</i></div>
+      <div><b>盈亏平衡</b><i>${m.be.length ? m.be.map(b => "$" + fmt(b, 2)).join(" / ") : "—"}</i></div>
+      <div><b>净权利金</b><i class="${m.net >= 0 ? "gain" : "loss"}">${m.net >= 0 ? "收 " : "付 "}${usd(Math.abs(m.net))}</i></div>
+      <div id="hov${id}"><b>指针处损益</b><i>移到图上</i></div>
+    </div>` : ""}`;
+
+  // 交互：在图上滑动可读出任意股价的损益
+  const svg = host.querySelector("svg"), hit = host.querySelector("#hit" + id),
+    cross = host.querySelector("#cross" + id), hov = host.querySelector("#hov" + id);
+  if (hit) {
+    const move = e => {
+      const r = svg.getBoundingClientRect();
+      const px = ((e.touches ? e.touches[0].clientX : e.clientX) - r.left) / r.width * W;
+      const s = xmin + (px - mL) / iw * (xmax - xmin);
+      if (s < xmin || s > xmax) return;
+      const v = payoffExp(o.legs, s);
+      cross.style.display = ""; cross.querySelector("line").setAttribute("x1", X(s));
+      cross.querySelector("line").setAttribute("x2", X(s));
+      cross.querySelector("circle").setAttribute("cx", X(s));
+      cross.querySelector("circle").setAttribute("cy", Y(v));
+      if (hov) hov.innerHTML = `<b>股价 $${fmt(s, 2)} 时</b><i class="${v >= 0 ? "gain" : "loss"}">${usd(v)}</i>`;
+    };
+    hit.addEventListener("mousemove", move);
+    hit.addEventListener("touchmove", e => { move(e); }, { passive: true });
+    hit.addEventListener("mouseleave", () => { cross.style.display = "none"; if (hov) hov.innerHTML = "<b>指针处损益</b><i>移到图上</i>"; });
+  }
+}
+function niceStep(raw) {
+  const p = Math.pow(10, Math.floor(Math.log10(raw))), n = raw / p;
+  return (n <= 1 ? 1 : n <= 2 ? 2 : n <= 5 ? 5 : 10) * p;
+}
+
+/* ================= 通用折线图（希腊字母用） ================= */
+function lineChart(host, cfg) {
+  const o = Object.assign({ series: [], xmin: 60, xmax: 140, xlabel: "股价", h: 240, marker: null, zero: false }, cfg);
+  const W = 720, H = o.h, mL = 56, mR = 14, mT = 12, mB = 28, iw = W - mL - mR, ih = H - mT - mB;
+  let lo = Infinity, hi = -Infinity;
+  o.series.forEach(s => s.data.forEach(([, y]) => { lo = Math.min(lo, y); hi = Math.max(hi, y); }));
+  if (o.zero) { lo = Math.min(lo, 0); hi = Math.max(hi, 0); }
+  const pad = (hi - lo) * .12 || 1; lo -= pad; hi += pad;
+  const X = x => mL + (x - o.xmin) / (o.xmax - o.xmin) * iw, Y = y => mT + (hi - y) / (hi - lo) * ih;
+  let grid = "", xt = "", yt = "";
+  const st = niceStep((o.xmax - o.xmin) / 6);
+  for (let x = Math.ceil(o.xmin / st) * st; x <= o.xmax; x += st) {
+    grid += `<line x1="${X(x)}" y1="${mT}" x2="${X(x)}" y2="${mT + ih}" stroke="var(--grid)"/>`;
+    xt += `<text x="${X(x)}" y="${mT + ih + 17}" text-anchor="middle" class="ax">${fmt(x, x % 1 ? 2 : 0)}</text>`;
+  }
+  const vs = niceStep((hi - lo) / 4);
+  for (let v = Math.ceil(lo / vs) * vs; v <= hi; v += vs) {
+    grid += `<line x1="${mL}" y1="${Y(v)}" x2="${mL + iw}" y2="${Y(v)}" stroke="var(--grid)"/>`;
+    yt += `<text x="${mL - 8}" y="${Y(v) + 4}" text-anchor="end" class="ax">${fmt(v, Math.abs(vs) < 1 ? 2 : 0)}</text>`;
+  }
+  const lines = o.series.map(s =>
+    `<path d="${s.data.map(([x, y], i) => (i ? "L" : "M") + X(x).toFixed(1) + " " + Y(y).toFixed(1)).join(" ")}"
+      fill="none" stroke="${s.color}" stroke-width="${s.w || 2.2}" ${s.dash ? 'stroke-dasharray="5 4"' : ""}/>`).join("");
+  const mk = o.marker !== null ? `<line x1="${X(o.marker)}" y1="${mT}" x2="${X(o.marker)}" y2="${mT + ih}" stroke="var(--amber)" stroke-width="1.4"/>` : "";
+  host.innerHTML = `<div class="chartbox"><svg class="payoff" viewBox="0 0 ${W} ${H}">
+    <style>.ax{font-family:var(--mono);font-size:10px;fill:var(--ink-faint)}</style>
+    ${grid}${o.zero ? `<line x1="${mL}" y1="${Y(0)}" x2="${mL + iw}" y2="${Y(0)}" stroke="var(--ink-soft)" stroke-width="1.1"/>` : ""}
+    ${mk}${lines}${xt}${yt}
+    <text x="${mL + iw / 2}" y="${H - 2}" text-anchor="middle" class="ax">${o.xlabel}</text>
+  </svg>
+  <div class="legend">${o.series.map(s => `<span><i style="background:${s.color}"></i>${s.name}</span>`).join("")}</div></div>`;
+}
+
+/* =========================================================
+   统一示例：股票 XYZ 现价 $100，隐含波动率 30%，到期 45 天
+   权利金均按 Black-Scholes 计算后取整，便于横向对比
+   ========================================================= */
+const S0 = 100;
+const PRICE = { c95: 7.40, c100: 4.40, c105: 2.40, c110: 1.20, p90: 0.75, p95: 1.90, p100: 3.95, p105: 6.90 };
+const DELTA = { c95: .72, c100: .55, c105: .36, c110: .21, p90: -.14, p95: -.28, p100: -.45, p105: -.64 };
+
+const STRATEGIES = [
+{
+  id:"long-call", name:"买入看涨期权", en:"Long Call", lv:1, dir:"看涨",
+  legs:[{kind:"call",dir:1,K:105,prem:PRICE.c105,qty:1}],
+  meaning:"用一笔有限的钱，锁定一段时间内以固定价格买入股票的<b>权利</b>。你付出的权利金买的是「上涨的斜率」，代价是时间每天在扣你的钱。",
+  build:"买入 1 张 105 Call，付出权利金 $2.40 × 100 = $240。这 $240 就是你为这次押注支付的全部成本。",
+  profit:"股价越高赚越多，理论上无上限。到期损益 = (股价 − 105 − 2.40) × 100。",
+  loss:"最大亏损 = 权利金 $240，发生在到期日股价 ≤ $105 的任何位置。注意：股价从 100 涨到 104.99 你依然亏光。",
+  be:"$107.40（行权价 + 权利金）。股价必须涨 7.4% 你才回本。",
+  when:"你对<b>方向</b>和<b>时间窗口</b>都有明确判断时。典型场景：预期催化剂（财报、审批、订单）在到期前落地；或想用小资金参与一段确定性较高的趋势。前提是隐含波动率不能太贵——IV 已经被炒高时买 Call 常常「猜对方向也亏钱」。",
+  risk:"三重逆风：股价不动亏（Theta）、涨得太慢亏（时间不够）、事件落地后 IV 崩塌亏（IV Crush）。虚值 Call 到期归零是常态而非意外——统计上大多数虚值 Call 最终一文不值。",
+  stockRisk:"如果你已经持有正股，再买 Call 等于<b>加杠杆同向</b>，把仓位风险放大而不是分散。真正想加仓应先问：直接买股票不行吗？Call 的价值在于亏损封顶，不在于「更便宜」。",
+  example:`<h5>案例 · 一次典型的买方交易</h5>
+    <p>付 $240 买入 XYZ 45 天后到期的 105 Call（Delta 0.36，即市场认为到期时价内的概率约 36%）。</p>
+    <table class="t"><tr><th>到期股价</th><th>期权价值</th><th>损益</th><th>收益率</th></tr>
+    <tr><td class="n">$98</td><td class="n">$0</td><td class="n loss">−$240</td><td class="n loss">−100%</td></tr>
+    <tr><td class="n">$105</td><td class="n">$0</td><td class="n loss">−$240</td><td class="n loss">−100%</td></tr>
+    <tr><td class="n">$107.40</td><td class="n">$240</td><td class="n">$0</td><td class="n">0%</td></tr>
+    <tr><td class="n">$115</td><td class="n">$1,000</td><td class="n gain">+$760</td><td class="n gain">+317%</td></tr>
+    <tr><td class="n">$125</td><td class="n">$2,000</td><td class="n gain">+$1,760</td><td class="n gain">+733%</td></tr></table>
+    <p style="margin-top:10px">同样看涨 15%，直接买 100 股要占用 $10,000、赚 $1,500（+15%）；买 Call 只占 $240、赚 $760（+317%）。<b>杠杆的另一面</b>：股价只涨到 $104，股票赚 4%，Call 亏 100%。</p>`
+},
+{
+  id:"long-put", name:"买入看跌期权", en:"Long Put", lv:1, dir:"看跌",
+  legs:[{kind:"put",dir:1,K:95,prem:PRICE.p95,qty:1}],
+  meaning:"买入一份「下跌保险」。可以是纯粹做空，也可以是给持仓买保护。与融券做空相比，最大的优势是<b>亏损封顶</b>，不会被逼仓。",
+  build:"买入 1 张 95 Put，付出 $1.90 × 100 = $190。",
+  profit:"股价跌越多赚越多，最大盈利出现在股价归零时 = (95 − 1.90) × 100 = $9,310。",
+  loss:"最大亏损 = $190，发生在到期股价 ≥ $95 时。",
+  be:"$93.10（行权价 − 权利金）。",
+  when:"（1）做空但不愿承担无限风险；（2）对持仓做定向对冲；（3）预期崩盘式下跌而非慢跌——Put 的时间成本很贵，慢跌常常跑不赢 Theta。市场恐慌时 Put 的 IV 会飙升，事后买保险的价格极其昂贵，所以保险要在便宜的时候买。",
+  risk:"股价横盘不动，Put 会稳定流失时间价值。另外要注意<b>波动率偏斜（skew）</b>：下方虚值 Put 的 IV 通常显著高于同等距离的 Call，你买的保险本来就带溢价。",
+  stockRisk:"若你持有正股，买 Put 就变成了「保护性看跌」（见下一条）——这是唯一能真正给正股封底的结构，成本是每年持续付保费，长期会明显拖累收益率。",
+  example:`<h5>案例 · 用 Put 表达做空观点</h5>
+    <p>你判断 XYZ 财报后会跌破 $90。买入 95 Put 花 $190。若财报后跌到 $85，Put 内在价值 $10，损益 +$810（+426%）。若股价只跌到 $94，Put 值 $1，你仍亏 $90——<b>方向对了但幅度不够，一样亏钱</b>。这是买方最常见的死法。</p>`
+},
+{
+  id:"covered-call", name:"备兑开仓", en:"Covered Call", lv:1, dir:"中性偏多",
+  legs:[{kind:"stock",dir:1,K:100,prem:0,qty:1},{kind:"call",dir:-1,K:105,prem:PRICE.c105,qty:1}],
+  meaning:"持有 100 股正股，同时卖出 1 张看涨期权。本质是<b>把股票未来的上涨空间，卖成现在的现金</b>。你从「持有资产」变成「持有资产 + 出租资产」。",
+  build:"持有 100 股 @ $100（成本 $10,000），卖出 1 张 105 Call 收 $240。净成本降至 $9,760。",
+  profit:"最大盈利 = 权利金 + 行权价与成本的差 = $240 + $500 = $740（+7.4%，45 天），股价 ≥ $105 时封顶。",
+  loss:"下跌风险与持股几乎相同，只是被权利金抵消了一部分。股价跌到 $80，你亏 $2,000 − $240 = $1,760。<b>备兑不是保护，是补贴。</b>",
+  be:"$97.60（股票成本 − 权利金）。",
+  when:"（1）你愿意在某个价格卖出这只股票；（2）预期股价温和上涨、横盘或小幅回落；（3）IV 处于中高位（IV Rank > 30）时权利金才值得收。<b>不适合</b>你极度看好、准备翻倍的股票，也不适合财报前后（除非你就是想赚 IV Crush 的钱并接受被行权）。",
+  risk:"真正的风险是<b>机会成本</b>：股价暴涨到 $150，你只能按 $105 交出股票，少赚 $4,500。而下跌时权利金那点缓冲很快就被吃掉。收益结构与卖出看跌期权完全相同——有限收益、大额下行风险。",
+  stockRisk:"这一条本身就是「有正股情况下」的策略。要点：必须每 100 股才能卖 1 张，卖超了就变成部分裸卖；被行权会触发实际卖出，可能产生税务后果；除息日前一天深度价内的 Call 有被提前行权的风险。详见下方「备兑开仓实操手册」。",
+  example:`<h5>案例 · 三种结局的完整账本</h5>
+    <table class="t"><tr><th>到期股价</th><th>股票损益</th><th>期权</th><th>合计</th><th>年化</th></tr>
+    <tr><td class="n">$88</td><td class="n loss">−$1,200</td><td class="n gain">+$240</td><td class="n loss">−$960</td><td class="n loss">−78%</td></tr>
+    <tr><td class="n">$100</td><td class="n">$0</td><td class="n gain">+$240</td><td class="n gain">+$240</td><td class="n gain">+19.5%</td></tr>
+    <tr><td class="n">$105</td><td class="n gain">+$500</td><td class="n gain">+$240</td><td class="n gain">+$740</td><td class="n gain">+60%</td></tr>
+    <tr><td class="n">$130</td><td class="n gain">+$500</td><td class="n loss">−$2,260</td><td class="n gain">+$740</td><td class="n">封顶</td></tr></table>
+    <p style="margin-top:10px">注意最后一行：股价涨到 $130，单纯持股赚 $3,000，备兑只赚 $740。<b>被行权不是亏损，是少赚</b>——但连续几次错过大涨，长期收益率会显著落后于单纯持股。</p>`
+},
+{
+  id:"csp", name:"现金担保看跌", en:"Cash-Secured Put", lv:1, dir:"中性偏多",
+  legs:[{kind:"put",dir:-1,K:95,prem:PRICE.p95,qty:1}],
+  meaning:"卖出看跌期权，并预留足额现金准备接货。等价于<b>「我愿意在 $95 买这只股票，在等待的过程中先收一笔钱」</b>。是最理性的建仓方式之一。",
+  build:"卖出 1 张 95 Put 收 $190，账户冻结 $9,500 现金作为担保。",
+  profit:"最大盈利 = 权利金 $190（+2% / 45 天，年化约 16%），股价 ≥ $95 时全额留下。",
+  loss:"股价跌破 $95 你以 $95 接货，此后风险等同持股。最大亏损 = (95 − 1.90) × 100 = $9,310（股价归零）。",
+  be:"$93.10。",
+  when:"你本来就想买这只股票，但觉得现价偏贵。IV 高时卖 Put 尤其划算。<b>铁律：只在你真心愿意持有的标的上卖 Put</b>，否则你只是在捡硬币而车正在开过来。",
+  risk:"最危险的误用是把 CSP 当成「稳定收息」。收益有限、亏损巨大，一次黑天鹅可以吃掉一年的权利金。另外要警惕在下跌趋势中反复卖 Put，会越接越多、越套越深。",
+  stockRisk:"若你已经持有该股票，再卖 Put 等于<b>加倍下注同一个方向</b>，总仓位风险是你原本以为的两倍。要按「假如全部被行权，总仓位是多少」来算风险敞口，而不是按当前市值。",
+  example:`<h5>案例 · 用 CSP 建仓</h5>
+    <p>你想买 XYZ，但不想在 $100 追。卖出 45 天后的 95 Put 收 $190。</p>
+    <ul class="tick">
+      <li>股价到期 &gt; $95：白拿 $190，年化 16%，再卖一轮。</li>
+      <li>股价到期 $92：被行权，以 $95 买入 100 股，实际成本 $93.10 —— 比当初 $100 买便宜 6.9%。</li>
+      <li>股价到期 $70：被行权买在 $95，浮亏 $2,310。<b>这就是代价</b>：你没有拒绝的权利。</li>
+    </ul>`
+},
+{
+  id:"protective-put", name:"保护性看跌", en:"Protective Put", lv:1, dir:"看涨 + 对冲",
+  legs:[{kind:"stock",dir:1,K:100,prem:0,qty:1},{kind:"put",dir:1,K:95,prem:PRICE.p95,qty:1}],
+  meaning:"持股同时买入看跌期权，给持仓装一个「地板」。相当于给股票买保险，保费就是权利金，免赔额就是股价到行权价之间的那一段。",
+  build:"持有 100 股 @ $100，买入 95 Put 付 $190。",
+  profit:"上涨空间保留，但每一分钱都要先扣掉 $190 的保费。",
+  loss:"最大亏损锁定 = (100 − 95) × 100 + 190 = $690（−6.9%），无论股价跌到多少。",
+  be:"$101.90。",
+  when:"（1）持有大额浮盈但暂不想卖（尤其涉及税务）；（2）财报、诉讼、宏观事件前的定向保护；（3）杠杆仓位需要硬性止损而又怕被针扎出局。买保险要挑 IV 低的时候，恐慌时保费贵得离谱。",
+  risk:"长期滚动买 Put 是<b>持续失血</b>的：每年买 5% 虚值的保护大约要吃掉 3–6% 的年化收益。适合事件驱动的短期保护，不适合常年挂着。",
+  stockRisk:"这是最直接的正股风险管理工具，但要算清「保护缺口」——95 以下才生效，100 到 95 的 5% 你要自己承担。想完全封死就得买价内 Put，那更贵。",
+  example:`<h5>案例 · 财报前的保护</h5>
+    <p>持有 100 股 @ $100，财报前买 95 Put 花 $190。财报暴雷跌到 $75：股票亏 $2,500，Put 赚 (95−75−1.90)×100 = $1,810，净亏 $690，止损生效。若财报大涨到 $120：股票赚 $2,000，Put 归零，净赚 $1,810 —— 保费吃掉了 9.5% 的收益。</p>`
+},
+{
+  id:"collar", name:"领口", en:"Collar", lv:2, dir:"中性",
+  legs:[{kind:"stock",dir:1,K:100,prem:0,qty:1},{kind:"put",dir:1,K:95,prem:PRICE.p95,qty:1},{kind:"call",dir:-1,K:105,prem:PRICE.c105,qty:1}],
+  meaning:"备兑 + 保护性看跌的合体：<b>卖掉上涨空间去支付下跌保险</b>。把持仓的损益压缩进一个窄区间，甚至可以做到零成本。",
+  build:"持有 100 股，买 95 Put 付 $190，卖 105 Call 收 $240 —— 净收 $50，这就是「零成本领口」（实际还小赚一点）。",
+  profit:"最大盈利 = (105 − 100) × 100 + 50 = $550。",
+  loss:"最大亏损 = (100 − 95) × 100 − 50 = $450。",
+  be:"$99.50。",
+  when:"（1）持有大额浮盈、想锁定但因税务或限售不能卖；（2）集中持仓（如员工股票）需要降低单一风险；（3）横盘震荡预期。这是机构管理集中持仓最常用的结构。",
+  risk:"收益被两头封死。若股票暴涨你什么也拿不到；若你选的 Call 太近，很快就会被行权而丢掉股票。调整两个行权价的距离就是在调整「保护力度 vs 上涨空间」。",
+  stockRisk:"领口把正股风险从「无限下行」压成「已知的有限区间」，是持股风险管理最完整的一步。代价是这只股票在到期前基本变成了一张固定收益凭证。",
+  example:`<h5>案例 · 锁定浮盈</h5>
+    <p>你在 $60 买入的股票现在 $100，浮盈 67%，但现在卖会立即产生税负。构建 95/105 领口后：最坏情况股价跌回 $40，你依然能在 $95 出货，锁定 58% 收益；最好情况 $105 交割，锁定 75% 收益。用 $50 的净收入换来 4 个月的安心。</p>`
+},
+{
+  id:"bull-call", name:"牛市看涨价差", en:"Bull Call Spread (Debit)", lv:2, dir:"看涨",
+  legs:[{kind:"call",dir:1,K:100,prem:PRICE.c100,qty:1},{kind:"call",dir:-1,K:110,prem:PRICE.c110,qty:1}],
+  meaning:"买一个近的 Call，卖一个远的 Call。<b>用「放弃更高的上涨」换「更便宜的入场成本」</b>。适合「我看涨，但涨幅大概到这里为止」。",
+  build:"买 100 Call 付 $4.40，卖 110 Call 收 $1.20，净支出 $3.20 × 100 = $320。",
+  profit:"最大盈利 = (110 − 100 − 3.20) × 100 = $680，股价 ≥ $110 时封顶。风险报酬比 1 : 2.13。",
+  loss:"最大亏损 = 净支出 $320，股价 ≤ $100 时。",
+  be:"$103.20（低行权价 + 净支出）。比单买 Call 的 $107.40 低得多。",
+  when:"温和看涨、且 IV 偏高时。卖出的那条腿抵消了一部分 IV 和 Theta 的负担，所以价差比单腿 Call 更「抗时间」。有明确阻力位时特别合适——把卖出腿放在阻力位上。",
+  risk:"盈利封顶，判断爆发性行情时会严重少赚。两条腿都要付手续费和价差成本，流动性差的标的容易「进得去出不来」。",
+  stockRisk:"若已持有正股，这个结构进一步放大同向敞口。更常见的组合是持股 + 熊市价差做保护，而不是再叠加牛市价差。",
+  example:`<h5>案例 · 与单买 Call 的对比</h5>
+    <table class="t"><tr><th>到期股价</th><th>单买 100 Call（$440）</th><th>100/110 价差（$320）</th></tr>
+    <tr><td class="n">$100</td><td class="n loss">−$440</td><td class="n loss">−$320</td></tr>
+    <tr><td class="n">$105</td><td class="n gain">+$60</td><td class="n gain">+$180</td></tr>
+    <tr><td class="n">$110</td><td class="n gain">+$560</td><td class="n gain">+$680</td></tr>
+    <tr><td class="n">$130</td><td class="n gain">+$2,560</td><td class="n gain">+$680</td></tr></table>
+    <p style="margin-top:10px">在 $130 以下的<b>绝大多数情形里，价差都优于单买 Call</b>。只有当你判断会出现大级别爆发时，单腿才更好。</p>`
+},
+{
+  id:"bear-put", name:"熊市看跌价差", en:"Bear Put Spread (Debit)", lv:2, dir:"看跌",
+  legs:[{kind:"put",dir:1,K:100,prem:PRICE.p100,qty:1},{kind:"put",dir:-1,K:90,prem:PRICE.p90,qty:1}],
+  meaning:"牛市看涨价差的镜像。买高行权价 Put、卖低行权价 Put，<b>用有限成本押注一段有限的下跌</b>。",
+  build:"买 100 Put 付 $3.95，卖 90 Put 收 $0.75，净支出 $3.20 × 100 = $320。",
+  profit:"最大盈利 = (100 − 90 − 3.20) × 100 = $680，股价 ≤ $90 时。",
+  loss:"最大亏损 = $320。",
+  be:"$96.80。",
+  when:"看空但有明确目标位（比如支撑位、估值下限）。下方 Put 的 IV 通常更高（skew），卖出低行权价的那条腿能把这份溢价收回来，所以熊市价差在结构上比单买 Put 更划算。",
+  risk:"跌破下沿后不再增值。若发生崩盘，你会眼睁睁看着盈利停在 $705。",
+  stockRisk:"持有正股时，熊市看跌价差是<b>成本可控的对冲</b>：比单买 Put 便宜，但保护范围只覆盖 100→90 这一段，跌破 90 之后正股的亏损重新开始裸奔。",
+  example:`<h5>案例 · 有目标位的做空</h5>
+    <p>你认为 XYZ 会从 $100 回到支撑位 $90 但不会更低。买 100/90 熊市价差花 $320，若如期跌到 $90，赚 $680（+213%）。同样的观点若用单买 100 Put（$395），在 $90 只赚 $605，且成本更高、Theta 更重。</p>`
+},
+{
+  id:"bull-put", name:"牛市看跌价差", en:"Bull Put Spread (Credit)", lv:2, dir:"看涨",
+  legs:[{kind:"put",dir:-1,K:95,prem:PRICE.p95,qty:1},{kind:"put",dir:1,K:90,prem:PRICE.p90,qty:1}],
+  meaning:"卖出一个 Put 收权利金，同时买一个更低的 Put 当保险。<b>把现金担保看跌的巨额风险，压缩成一个已知的小数字</b>。这是最常用的信用价差。",
+  build:"卖 95 Put 收 $1.90，买 90 Put 付 $0.75，净收 $1.15 × 100 = $115。保证金占用 = 价差宽度 − 净收 = $385。",
+  profit:"最大盈利 = 收到的 $115，股价 ≥ $95 时。相对保证金的回报率 = 115/385 = 29.9%（45 天）。",
+  loss:"最大亏损 = (95 − 90) × 100 − 115 = $385，股价 ≤ $90 时。",
+  be:"$93.85。",
+  when:"看涨或中性、IV 偏高、资金效率优先时。同样的观点，CSP 要冻结 $9,500，牛市看跌价差只要 $385 —— <b>资本效率高 25 倍</b>，代价是不能接货。",
+  risk:"典型的「赢面大、赔率差」结构：胜率可能 75%，但亏一次要连赢三次才补得回来。所以<b>不能靠胜率安慰自己</b>，必须设定亏到 2 倍权利金就止损的纪律。",
+  stockRisk:"不涉及正股，也无法转成正股（除非放弃保护腿）。若你的目的是建仓，用 CSP；若目的是收租，用价差。",
+  example:`<h5>案例 · 收益与风险的真实比例</h5>
+    <p>连续卖出 4 次这个价差，3 次全胜 1 次全败：+115 × 3 − 385 = <b>−$40</b>。75% 的胜率仍然亏钱。<br>要盈亏平衡，胜率必须高于 385 ÷ (385+115) = <b>77%</b>。这就是为什么信用价差必须在 IV 高的时候做——只有权利金足够厚，胜率门槛才降得下来。</p>`
+},
+{
+  id:"bear-call", name:"熊市看涨价差", en:"Bear Call Spread (Credit)", lv:2, dir:"看跌",
+  legs:[{kind:"call",dir:-1,K:105,prem:PRICE.c105,qty:1},{kind:"call",dir:1,K:110,prem:PRICE.c110,qty:1}],
+  meaning:"卖出较低的 Call，买入较高的 Call 封顶。<b>裸卖看涨期权的安全版本</b>——在「股价不会涨过某个价位」上下注。",
+  build:"卖 105 Call 收 $2.40，买 110 Call 付 $1.20，净收 $1.20 × 100 = $120。保证金 $380。",
+  profit:"最大盈利 = $120，股价 ≤ $105 时。",
+  loss:"最大亏损 = (110 − 105) × 100 − 120 = $380。",
+  be:"$106.20。",
+  when:"看跌或横盘、IV 高位。把卖出腿放在明确的技术阻力位或前高之上，胜率会明显提升。",
+  risk:"上涨行情中会被快速击穿，且股票的上涨没有边界感——被突破时往往伴随跳空。绝不要在有并购传闻的标的上做。",
+  stockRisk:"持有正股时，熊市看涨价差是「备兑的替代品」：不需要交出股票，但也享受不到备兑那种「大不了卖掉」的心理安慰。若股价暴涨，你的正股赚钱、价差亏钱，两者部分抵消，净效果接近备兑。",
+  example:`<h5>案例 · 阻力位下注</h5>
+    <p>XYZ 在 $105 有过三次冲高回落。卖 105/110 熊市看涨价差收 $120。只要 45 天内不站上 $106.20，你就赚钱。若突破涨到 $120，你亏满 $380 —— 但对比裸卖 105 Call，那要亏 $1,260。</p>`
+},
+{
+  id:"wheel", name:"轮子策略", en:"The Wheel", lv:2, dir:"中性偏多",
+  legs:[{kind:"put",dir:-1,K:95,prem:PRICE.p95,qty:1}],
+  meaning:"一套<b>循环流程</b>而非单一结构：卖 CSP → 被行权拿到股票 → 卖 Covered Call → 被行权卖出股票 → 回到卖 CSP。在一只你愿意长期持有的股票上反复收权利金。",
+  build:"第 1 步卖 95 Put 收 $190；若被行权，以 $95 持股；第 2 步卖 100 Call 收权利金；若被行权，以 $100 卖出，同时赚了两轮权利金和 $5 价差。",
+  profit:"每一轮的权利金 + 可能的价差收益。年化 15–25% 是常见的现实区间，宣称 50%+ 的通常没算上被套的那些轮。",
+  loss:"当股价持续下跌时，你会在高位接货、然后被迫在成本价之上卖 Call（权利金极低），资金被长期锁死。<b>轮子最怕的不是波动，是趋势下跌。</b>",
+  be:"随每轮权利金累计下移。",
+  when:"标的必须满足：（1）你愿意长期持有；（2）流动性好、期权链活跃；（3）不是高波动的题材股。指数 ETF 和成熟大盘股最合适，妖股最不合适。",
+  risk:"最大的心理陷阱是把「被套」记成「持有」。真实的风险是：轮子在牛市跑输指数（上涨被封顶），在熊市跟着深套（下跌没保护），只在震荡市里显著占优。",
+  stockRisk:"整套流程本质上就是「持有正股 + 反复卖出上涨空间」。必须按 100 股为单位管理，并且要计算<b>如果所有 Put 都被行权，总占用资金是多少</b>——这才是真实敞口。",
+  example:`<h5>案例 · 一个完整的轮子周期</h5>
+    <ol style="padding-left:18px;margin:6px 0">
+      <li>卖 95 Put 收 $190 → 股价跌到 $92，被行权，持股成本 $95（实际 $93.10）。</li>
+      <li>持股后卖 95 Call 收 $200 → 股价回到 $97，被行权，以 $95 卖出。</li>
+      <li>净结果：股票不赚不亏，权利金累计 $390，占用资金 $9,500 约 3 个月 → 年化约 16%。</li>
+      <li><b>反例</b>：若股价跌到 $70 且不再回来，你手里是浮亏 $2,500 的股票，只能卖 $75 的 Call 收几毛钱，或者接受亏损了结。</li>
+    </ol>`
+},
+{
+  id:"naked-call", name:"裸卖看涨期权", en:"Naked / Uncovered Call", lv:3, dir:"看跌",
+  legs:[{kind:"call",dir:-1,K:105,prem:PRICE.c105,qty:1}],
+  meaning:"在没有正股的情况下卖出看涨期权。<b>所有期权结构中风险最高的一种</b>：收益封死在权利金，亏损理论上无限。这里列出它是为了让你认识它，而不是使用它。",
+  build:"卖出 1 张 105 Call 收 $240，券商会要求可观的保证金并随股价上涨追加。",
+  profit:"最大盈利 = $240。",
+  loss:"<b>理论无上限。</b>股价涨到 $200，你亏 $9,260；被并购跳空到 $300，你亏 $19,260。",
+  be:"$107.40。",
+  when:"几乎没有适合散户的场景。任何看跌观点都可以用熊市看涨价差表达，风险有限、保证金低得多。若你觉得「加个保护腿少收 $120 不划算」，那正是你不该做这笔交易的信号。",
+  risk:"除了无限亏损，还有强制平仓风险：股价急涨时保证金要求暴增，券商可能在最差的价格上帮你平仓。历史上散户爆仓的主因之一。",
+  stockRisk:"一旦你持有 100 股，同一张 Call 就从「裸卖」变成「备兑」，风险性质完全不同。所以务必确认股票数量与合约张数匹配——<b>卖 3 张 Call 但只有 200 股，其中 1 张就是裸的</b>。",
+  example:`<h5>案例 · 为什么不要做</h5>
+    <p>2021 年多只小盘股在数日内上涨 5–10 倍。一张 $240 权利金的虚值 Call，可以在一周内变成 $20,000 的亏损，是权利金的 80 倍。卖方生意的本质是「捡硬币」，而裸卖 Call 是在推土机前面捡。</p>`
+},
+{
+  id:"straddle", name:"买入跨式", en:"Long Straddle", lv:3, dir:"押波动",
+  legs:[{kind:"call",dir:1,K:100,prem:PRICE.c100,qty:1},{kind:"put",dir:1,K:100,prem:PRICE.p100,qty:1}],
+  meaning:"同时买入同一行权价的 Call 和 Put。<b>不赌方向，只赌「会有大动作」</b>。你买的是波动率本身。",
+  build:"买 100 Call 付 $4.40 + 买 100 Put 付 $3.95 = 净支出 $8.35 × 100 = $835。",
+  profit:"两个方向都无上限，只要动得够大。",
+  loss:"最大亏损 = $835，发生在到期股价恰好 $100 时。",
+  be:"$91.65 与 $108.35 —— 股价必须变动超过 <b>±8.35%</b> 才开始赚钱。",
+  when:"预期事件会引发远超市场定价的波动。关键是比较「期权隐含的波动幅度」与「你预期的波动幅度」：这里隐含 ±8.35%，若你认为财报只会带来 ±5%，那买跨式必亏。",
+  risk:"最著名的陷阱是 <b>IV Crush</b>：财报前 IV 被推到 80%，财报后瞬间回落到 35%。哪怕股价真的跳空 6%，两条腿的 IV 同时崩塌，你依然可能亏钱。买跨式赚的是「实际波动 &gt; 隐含波动」，不是「有波动」。",
+  stockRisk:"持有正股时买 Straddle 会变成偏多结构（正股 + Straddle ≈ 加了保护的多头），一般更直接的做法是持股 + 买 Put。",
+  example:`<h5>案例 · 财报前的定价博弈</h5>
+    <p>财报前 Straddle 报价 $8.35，意味着市场认为财报后股价会动 ±8.35%。<br>
+    · 实际跳空到 $112（+12%）：Call 值 $12，Put 归零，赚 $365。<br>
+    · 实际跳空到 $106（+6%）：Call 值 $6，Put 归零，亏 $235 —— <b>方向对、幅度不够，照样亏</b>。<br>
+    · 财报后原地不动：亏 $600 以上，因为 IV 从 60% 崩到 30%。</p>`
+},
+{
+  id:"strangle", name:"买入宽跨式", en:"Long Strangle", lv:3, dir:"押波动",
+  legs:[{kind:"call",dir:1,K:105,prem:PRICE.c105,qty:1},{kind:"put",dir:1,K:95,prem:PRICE.p95,qty:1}],
+  meaning:"买虚值 Call + 买虚值 Put。比跨式便宜，但需要更大的波动才能回本。",
+  build:"买 105 Call 付 $2.40 + 买 95 Put 付 $1.90 = 净支出 $4.30 × 100 = $430。",
+  profit:"两侧无上限。",
+  loss:"最大亏损 = $430，发生在到期股价落在 $95–$105 之间的任何位置（这是一个<b>区间</b>，不是一个点，所以最大亏损出现的概率比跨式高）。",
+  be:"$90.70 与 $109.30，即需要 ±9.3% 的波动。",
+  when:"预期极端行情（并购、审批、崩盘）。成本低是优点，但「更便宜」意味着「更容易归零」。卖出宽跨式（Short Strangle）则是相反的高胜率低赔率结构，风险两端都无限，不建议无经验时使用。",
+  risk:"同跨式，且更依赖大幅波动。到期时两条腿双双归零是最常见结果。",
+  stockRisk:"与跨式相同。",
+  example:`<h5>案例 · 跨式 vs 宽跨式</h5>
+    <p>同一场财报：跨式成本 $835、回本需 ±8.35%；宽跨式成本 $430、回本需 ±9.3%。<br>若股价跳空 15%：跨式赚 $665（+80%），宽跨式赚 $570（+133%）。<br>若跳空 9%：跨式赚 $65，宽跨式亏 $30。<b>宽跨式是「更极端预期」的表达。</b></p>`
+},
+{
+  id:"iron-condor", name:"铁鹰式", en:"Iron Condor", lv:3, dir:"中性",
+  legs:[{kind:"put",dir:1,K:90,prem:PRICE.p90,qty:1},{kind:"put",dir:-1,K:95,prem:PRICE.p95,qty:1},{kind:"call",dir:-1,K:105,prem:PRICE.c105,qty:1},{kind:"call",dir:1,K:110,prem:PRICE.c110,qty:1}],
+  meaning:"牛市看跌价差 + 熊市看涨价差同时上。<b>押注股价会待在一个区间里</b>，四条腿构成一个带保护的「箱子」。",
+  build:"卖 95 Put / 买 90 Put + 卖 105 Call / 买 110 Call。净收 (1.90−0.75) + (2.40−1.20) = $2.35 × 100 = $235。保证金 = 单侧宽度 $500 − $235 = $265。",
+  profit:"最大盈利 = $235，股价在 $95–$105 之间时。相对保证金回报 88%（45 天）——数字很诱人，正因为如此要格外小心。",
+  loss:"最大亏损 = $265，任一侧被完全突破时。",
+  be:"$92.65 与 $107.35。",
+  when:"高 IV + 预期区间震荡 + 无重大事件。铁鹰最理想的环境是 IV Rank 高但即将回落，比如财报刚过、市场恐慌刚平息。<b>低 IV 时做铁鹰是在用大风险换小钱。</b>",
+  risk:"典型的「捡硬币」结构：赢的概率高，输的金额大。真实杀手是<b>趋势行情</b>——股价单边走出区间，你会连续被一侧击穿。管理规则通常是：赚到 50% 权利金就平仓，被一侧触及就调整或止损。",
+  stockRisk:"不涉及正股。若你持有正股，铁鹰的看涨一侧会与持仓形成对冲，但看跌一侧会加重下行敞口，需要合并计算净 Delta。",
+  example:`<h5>案例 · 别被胜率骗了</h5>
+    <p>这个铁鹰的理论胜率约 70%（股价落在 $92.65–$107.35 内的概率）。<br>10 次交易：7 次赚 $235 = +$1,645，3 次亏 $265 = −$795，净 +$850。<b>看起来不错</b>。<br>但若市场进入趋势（比如 2022 或 2020 那种年份），胜率跌到 50%：5×235 − 5×265 = −$150，还要扣 40 次手续费（四条腿开平共 8 笔）。<b>铁鹰的利润非常薄，交易成本会吃掉相当大一块。</b></p>`
+},
+{
+  id:"iron-butterfly", name:"铁蝶式", en:"Iron Butterfly", lv:3, dir:"中性",
+  legs:[{kind:"put",dir:1,K:90,prem:PRICE.p90,qty:1},{kind:"put",dir:-1,K:100,prem:PRICE.p100,qty:1},{kind:"call",dir:-1,K:100,prem:PRICE.c100,qty:1},{kind:"call",dir:1,K:110,prem:PRICE.c110,qty:1}],
+  meaning:"铁鹰的收紧版：中间两条腿都卖在平值。<b>权利金更厚，但盈利区间更窄</b>——你在下注「股价几乎不动」。",
+  build:"卖 100 Put + 卖 100 Call（收 $8.35），买 90 Put + 买 110 Call（付 $1.95），净收 $6.40 × 100 = $640。保证金 = $1,000 − $640 = $360。",
+  profit:"最大盈利 = $640，且只在股价恰好收在 $100 时达到。",
+  loss:"最大亏损 = $360，股价 ≤ $90 或 ≥ $110 时。",
+  be:"$93.60 与 $106.40。",
+  when:"极高 IV 且你确信会均值回归，比如财报公布后的 IV 崩塌行情。相比铁鹰，铁蝶的赔率更好（1.78:1）但胜率更低。",
+  risk:"盈利峰值是一个「尖」，实际很少能拿满。绝大多数时候你是在 50–70% 的位置了结。中间两条腿是平值，<b>提前指派的风险最高</b>。",
+  stockRisk:"不涉及正股。",
+  example:`<h5>案例 · 与铁鹰的取舍</h5>
+    <table class="t"><tr><th></th><th>铁鹰 95/105</th><th>铁蝶 100/100</th></tr>
+    <tr><td>净收权利金</td><td class="n">$235</td><td class="n">$640</td></tr>
+    <tr><td>最大亏损</td><td class="n">$265</td><td class="n">$360</td></tr>
+    <tr><td>盈利区间</td><td class="n">$92.65–107.35</td><td class="n">$93.60–106.40</td></tr>
+    <tr><td>赔率</td><td class="n">0.89 : 1</td><td class="n">1.78 : 1</td></tr></table>
+    <p style="margin-top:10px">铁鹰用更宽的区间换更差的赔率，铁蝶反之。<b>没有免费午餐，只有你更相信哪种情形。</b></p>`
+},
+{
+  id:"calendar", name:"日历价差", en:"Calendar Spread", lv:3, dir:"中性 / 押 IV",
+  legs:[{kind:"call",dir:-1,K:100,prem:PRICE.c100,qty:1},{kind:"call",dir:1,K:100,prem:6.80,qty:1}],
+  meaning:"卖近期、买远期，同一行权价。<b>赚的是「近月比远月衰减得更快」</b>这个时间结构上的差异，同时对远期波动率做多。",
+  build:"卖 45 天 100 Call 收 $4.40，买 100 天 100 Call 付 $6.80，净支出 $2.40 × 100 = $240。",
+  profit:"最大盈利出现在近月到期时股价恰好等于行权价，此时近月归零而远月仍有可观时间价值。数值取决于届时的 IV，通常是成本的 50–100%。",
+  loss:"最大亏损 = 净支出 $240（股价大幅偏离行权价时，两条腿价值趋同）。",
+  be:"两侧各有一个平衡点，随 IV 变化而移动。",
+  when:"（1）预期短期横盘、长期有动作；（2）近月 IV 明显高于远月（期限结构倒挂），比如财报在近月到期日之前。这是少数能<b>同时做多波动率和做多时间</b>的结构。",
+  risk:"注意本页的到期损益图对日历价差<b>不完全适用</b>——因为两条腿到期日不同，真实损益必须用定价模型算。这也是日历价差比垂直价差难管理的原因：你必须理解 Vega。IV 整体下降会直接伤害它。",
+  stockRisk:"不涉及正股。持股者更常用的时间结构是下一条的「穷人的备兑」。",
+  example:`<h5>案例 · 财报前的期限结构</h5>
+    <p>财报在 30 天后。25 天到期的期权 IV 高达 65%，60 天到期的只有 38%。卖近月、买远月，赚的就是这 27 个点的 IV 差。若财报后 IV 回落到 35%，你的远月腿也会缩水——所以这笔交易真正的要求是：<b>近月 IV 的跌幅要大于远月</b>。</p>`
+},
+{
+  id:"pmcc", name:"穷人的备兑（对角价差）", en:"Poor Man's Covered Call / Diagonal", lv:3, dir:"看涨",
+  legs:[{kind:"call",dir:1,K:80,prem:23.50,qty:1},{kind:"call",dir:-1,K:105,prem:PRICE.c105,qty:1}],
+  meaning:"用一张深度价内的长期 Call（LEAPS）<b>代替 100 股正股</b>，然后在它上面反复卖出短期 Call。资金占用只有真实备兑的 1/4，逻辑完全相同。",
+  build:"买 1 年后到期的 80 Call 付 $23.50（Delta ≈ 0.85，占用 $2,350），卖 45 天 105 Call 收 $240。净成本 $2,110，而真实备兑要 $9,760。",
+  profit:"最大盈利 ≈ (105 − 80 − 净成本 21.10) × 100 = $390，加上长期腿剩余的时间价值。资金效率是备兑的 3–4 倍。",
+  loss:"最大亏损 = 净成本 $2,110（股价跌破 $80 时长期腿归零）。注意这是<b>100% 本金亏损</b>，而真实备兑在股价 $80 时只亏 20%。",
+  be:"长期腿的成本决定，约 $101。",
+  when:"（1）资金有限但想执行备兑逻辑；（2）看好标的中长期方向。<b>长期腿必须选 Delta ≥ 0.80、到期 ≥ 9 个月</b>，否则它的 Theta 衰减会超过你收的权利金，整个结构就失效了。",
+  risk:"三个致命细节：① 卖出腿的行权价必须高于「长期腿行权价 + 长期腿成本」，否则最坏情况下是亏的；② 长期腿本身也在衰减，只是慢一些；③ 若短期腿被行权而你的长期腿又不足以覆盖，会产生复杂的头寸调整。<b>没有股息</b>，也没有正股那种「大不了拿着」的退路。",
+  stockRisk:"这条恰恰是「没有正股时如何做备兑」。与真正持股的核心差别：正股不会到期归零，LEAPS 会。所以 PMCC 的下行风险<b>比备兑更严重</b>，虽然绝对金额更小。",
+  example:`<h5>案例 · 资金效率的代价</h5>
+    <table class="t"><tr><th>股价 $75 时</th><th>真实备兑</th><th>PMCC</th></tr>
+    <tr><td>投入</td><td class="n">$9,760</td><td class="n">$2,110</td></tr>
+    <tr><td>结果</td><td class="n loss">−$2,260（−23%）</td><td class="n loss">−$2,110（−100%）</td></tr>
+    <tr><td>之后</td><td>继续持股，可等待反弹</td><td>归零出局，没有下一轮</td></tr></table>
+    <p style="margin-top:10px">PMCC 的绝对亏损更小，但<b>它剥夺了你「熬过去」的选项</b>——这是持有正股最被低估的价值。</p>`
+},
+{
+  id:"leaps", name:"LEAPS 替代正股", en:"LEAPS as Stock Replacement", lv:3, dir:"看涨",
+  legs:[{kind:"call",dir:1,K:80,prem:23.50,qty:1}],
+  meaning:"用一张到期一年以上、Delta 0.80+ 的深度价内 Call 代替 100 股股票。<b>用 1/4 的资金拿到 85% 的上涨参与度</b>，同时把下跌风险封在期权成本内。",
+  build:"买入 1 年后到期的 80 Call，付 $23.50（内在价值 $20 + 时间价值 $3.50）。",
+  profit:"股价每涨 $1，期权约涨 $0.85（Delta），随着股价上涨 Delta 趋近 1。",
+  loss:"最大亏损 = $2,350，股价 ≤ $80 时全损。",
+  be:"$103.50。",
+  when:"你对标的有 1–3 年的中长期信心，同时希望释放资金做别的事。深度价内 LEAPS 的时间价值占比很低（这里只有 $3.50 / $2,350 = 1.5% 的年化时间成本），是所有做多杠杆里最便宜的一种。",
+  risk:"三件事必须清楚：① <b>没有股息</b>，高股息股票用 LEAPS 替代会损失可观收益；② 有到期日，判断对了方向但时间不够依然归零；③ 流动性差的 LEAPS 买卖价差可能高达 5%，进出成本惊人。",
+  stockRisk:"与持有正股的关键差别在心理层面：股票被套可以放着，LEAPS 被套有倒计时。所以用 LEAPS 替代正股时，<b>仓位必须比你原本打算买股票的金额更小</b>，而不是「反正便宜就多买几张」——那是把风险管理工具变成了赌博工具。",
+  example:`<h5>案例 · 杠杆的正确用法</h5>
+    <p>你打算投入 $10,000 买 100 股。改成买 4 张 LEAPS（$9,400）是<b>错误示范</b>——那是 4 倍杠杆。<br>正确做法：买 1 张 LEAPS（$2,350），把省下的 $7,650 放在现金或其他资产里。这样你的上涨参与度约等于 85 股，下跌最大亏损 $2,350，同时保有了充足的干火药。<b>杠杆工具用来省资金，不是用来放大仓位。</b></p>`
+}
+];
+
+const CHAPTERS = `
+
+<!-- ============ 1. 基础 ============ -->
+<section class="chapter wrap" id="basics">
+  <div class="ch-head"><span class="ch-num">01</span><h2>期权到底是什么</h2></div>
+  <p class="ch-sub">一份期权合约 = 在<b>某个日期之前</b>，以<b>某个价格</b>，买入或卖出 100 股股票的<b>权利</b>（买方）或<b>义务</b>（卖方）。整个市场的复杂度都是从这一句话长出来的。</p>
+
+  <div class="grid2">
+    <div class="card pad">
+      <h4 class="mini">合约的五个要素</h4>
+      <table class="t">
+        <tr><td><b>标的</b></td><td>哪只股票 / ETF / 指数</td></tr>
+        <tr><td><b>类型</b></td><td>Call（看涨）或 Put（看跌）</td></tr>
+        <tr><td><b>行权价 K</b></td><td>约定的成交价格</td></tr>
+        <tr><td><b>到期日</b></td><td>权利失效的日期</td></tr>
+        <tr><td><b>乘数</b></td><td>美股为 100，报价 $2.40 = 实付 $240</td></tr>
+      </table>
+      <div class="note">读法示例：<span class="kbd">XYZ Oct16'26 105 C @ 2.40</span> —— XYZ 股票、2026 年 10 月 16 日到期、行权价 $105 的看涨期权，每张 $240。</div>
+    </div>
+    <div class="card pad">
+      <h4 class="mini">四种基础头寸：权利与义务</h4>
+      <table class="t">
+        <tr><th></th><th>买方（付钱）</th><th>卖方（收钱）</th></tr>
+        <tr><td><b>Call</b></td><td>有权在 K 买入<br><span class="gain">盈利无上限</span> / <span class="loss">亏损 = 权利金</span></td><td>有义务在 K 卖出<br><span class="gain">盈利 = 权利金</span> / <span class="loss">亏损无上限</span></td></tr>
+        <tr><td><b>Put</b></td><td>有权在 K 卖出<br><span class="gain">盈利至股价归零</span> / <span class="loss">亏损 = 权利金</span></td><td>有义务在 K 买入<br><span class="gain">盈利 = 权利金</span> / <span class="loss">亏损至股价归零</span></td></tr>
+      </table>
+      <p class="tight" style="margin-top:12px;font-size:14px;color:var(--ink-soft)">买方买的是<b>可能性</b>，卖方卖的是<b>确定性</b>。买方胜率低赔率高，卖方胜率高赔率低。两边长期期望都接近零，差别在于你能不能承受各自的失败形态。</p>
+    </div>
+  </div>
+
+  <div class="grid2" style="margin-top:18px">
+    <div class="card pad">
+      <h4 class="mini">内在价值 + 时间价值 = 期权价格</h4>
+      <p class="tight"><b>内在价值</b>：立刻行权能拿到的钱。Call = max(股价 − K, 0)，Put = max(K − 股价, 0)。永远 ≥ 0。</p>
+      <p class="tight"><b>时间价值</b>：期权价格超出内在价值的部分，是市场为「未来还可能变得更值钱」支付的溢价。<b>它在到期日必然归零</b>。</p>
+      <div id="tvChart" style="margin-top:10px"></div>
+      <p class="tight" style="margin-top:10px;font-size:14px;color:var(--ink-soft)">平值期权的时间价值最厚，深度价内和深度虚值最薄。所以卖方最喜欢卖平值附近，买方想要杠杆则会买虚值。</p>
+    </div>
+    <div class="card pad">
+      <h4 class="mini">价内 / 平值 / 价外</h4>
+      <table class="t">
+        <tr><th>状态</th><th>Call</th><th>Put</th><th>特征</th></tr>
+        <tr><td>价内 ITM</td><td>股价 &gt; K</td><td>股价 &lt; K</td><td>有内在价值，Delta 大，杠杆低</td></tr>
+        <tr><td>平值 ATM</td><td colspan="2">股价 ≈ K</td><td>时间价值最高，Gamma 与 Theta 最大</td></tr>
+        <tr><td>价外 OTM</td><td>股价 &lt; K</td><td>股价 &gt; K</td><td>全是时间价值，杠杆高，归零概率大</td></tr>
+      </table>
+      <h4 class="mini" style="margin-top:18px">行权与被指派</h4>
+      <ul class="tick">
+        <li>美式期权（个股）到期前任何时候都可能被行权；欧式（多数指数期权）只能在到期日。</li>
+        <li>到期日收盘价内 $0.01 以上通常会被<b>自动行权</b>。不想接货就要在到期前平仓。</li>
+        <li>提前指派的两个高发场景：<b>除息日前一天</b>的深度价内 Call，以及深度价内的 Put。</li>
+        <li>被指派不是灾难，是合约的正常履行。真正的问题是你的账户里有没有对应的股票或现金。</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="card pad" style="margin-top:18px">
+    <h4 class="mini">怎么读期权链——下单前必看的五个数字</h4>
+    <div class="grid3">
+      <div><b>Bid / Ask</b><p class="tight" style="font-size:14px;color:var(--ink-soft)">买卖报价。价差超过中间价的 10% 就说明流动性差，进出成本会吃掉你的利润。用限价单挂在中间价附近成交。</p></div>
+      <div><b>Volume / 未平仓量 OI</b><p class="tight" style="font-size:14px;color:var(--ink-soft)">当日成交量与存量合约。OI &lt; 100 的合约基本不要碰。OI 突然暴增可能是有人在建大仓位。</p></div>
+      <div><b>隐含波动率 IV</b><p class="tight" style="font-size:14px;color:var(--ink-soft)">市场对未来波动的定价，直接决定权利金贵不贵。要和该标的自己的历史 IV 比（IV Rank / IV Percentile），不能和别的股票比。</p></div>
+      <div><b>Delta</b><p class="tight" style="font-size:14px;color:var(--ink-soft)">既是对冲比率，也可粗略当作「到期价内的概率」。0.30 的 Call 约有 30% 概率被行权。</p></div>
+      <div><b>到期日</b><p class="tight" style="font-size:14px;color:var(--ink-soft)">优先选月度期权（每月第三个周五），流动性远好于周期权。</p></div>
+      <div><b>价差宽度检查</b><p class="tight" style="font-size:14px;color:var(--ink-soft)">下单前算一次：(Ask−Bid)/Mid。&lt;5% 优秀，5–10% 可接受，&gt;10% 换标的。</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 2. 希腊字母 ============ -->
+<section class="chapter wrap" id="greeks">
+  <div class="ch-head"><span class="ch-num">02</span><h2>希腊字母：期权价格的五个方向盘</h2></div>
+  <p class="ch-sub">期权价格由五个变量驱动：股价、行权价、剩余时间、波动率、利率。希腊字母就是价格对每个变量的敏感度。拖动下面的滑块，观察它们怎么互相牵动。</p>
+
+  <div class="card">
+    <div class="pad" style="border-bottom:1px solid var(--rule)">
+      <div class="grid3" id="gkControls"></div>
+    </div>
+    <div class="pad">
+      <div class="chipbar" id="gkTabs"></div>
+      <div id="gkChart"></div>
+      <div class="readout" id="gkOut"></div>
+    </div>
+  </div>
+
+  <div class="grid2" style="margin-top:18px">
+    <div class="card pad">
+      <h4 class="mini">Δ Delta · 方向敞口</h4>
+      <p class="tight">股价每变动 $1，期权价格变动多少。Call 为 0→1，Put 为 −1→0。</p>
+      <ul class="tick">
+        <li><b>当作概率读</b>：Delta 0.30 ≈ 30% 概率到期价内。这是选行权价最实用的心法。</li>
+        <li><b>当作股数读</b>：1 张 Delta 0.30 的 Call ≈ 持有 30 股。持仓总 Delta 就是你真实的方向敞口。</li>
+        <li>持有 100 股 + 卖出 1 张 0.30 Call，净 Delta = 70，等于你只承担 70 股的涨跌。</li>
+      </ul>
+    </div>
+    <div class="card pad">
+      <h4 class="mini">Γ Gamma · Delta 的变化速度</h4>
+      <p class="tight">Gamma 高意味着 Delta 会剧烈变化，头寸性质会突然改变。</p>
+      <ul class="tick">
+        <li>平值 + 临近到期时 Gamma 最大，这就是所谓「<b>Gamma 风险</b>」。</li>
+        <li>卖方最怕 Gamma：到期前几天，一个小小的跳空能让原本安全的虚值期权瞬间深度价内。</li>
+        <li>这也是 0DTE 期权极端危险的原因——Gamma 趋于无穷，价格几分钟内翻倍或归零都正常。</li>
+      </ul>
+    </div>
+    <div class="card pad">
+      <h4 class="mini">Θ Theta · 时间的价格</h4>
+      <p class="tight">每过一天期权损失多少价值。买方为负，卖方为正。</p>
+      <ul class="tick">
+        <li>衰减<b>不是线性的</b>：最后 30 天加速，最后一周断崖式下跌。</li>
+        <li>卖方的最佳窗口通常是 <b>30–45 天到期</b>：这段区间的每日衰减速度与被突破的风险比最划算。</li>
+        <li>买方应尽量避开最后两周持有虚值期权，那是 Theta 最凶残的地带。</li>
+      </ul>
+    </div>
+    <div class="card pad">
+      <h4 class="mini">ν Vega · 波动率敞口</h4>
+      <p class="tight">IV 每变动 1 个百分点，期权价格变动多少。买方为正，卖方为负。</p>
+      <ul class="tick">
+        <li>财报前 IV 抬升 → 买方受益；财报公布后 IV 崩塌（<b>IV Crush</b>）→ 卖方受益。</li>
+        <li>这就是「猜对方向仍然亏钱」的头号原因：你赢了 Delta，输了 Vega。</li>
+        <li>剩余时间越长，Vega 越大。所以 LEAPS 对波动率极其敏感。</li>
+      </ul>
+      <div class="note" style="margin-bottom:0">ρ Rho（利率敏感度）对多数散户可以忽略，只在超长期 LEAPS 和利率剧变时才有实质影响。</div>
+    </div>
+  </div>
+
+  <div class="warn" style="margin-top:18px"><b>把希腊字母当仪表盘，而不是公式。</b>开仓前问四句话：我的净 Delta 是多少（方向敞口）？Theta 是正是负（时间站在哪边）？Vega 是正是负（我在做多还是做空波动率）？临近到期时 Gamma 会不会让我失控？能答上这四句，你对这笔交易的理解就已经超过大多数人。</div>
+</section>
+
+<!-- ============ 3. 损益实验室 ============ -->
+<section class="chapter wrap" id="lab">
+  <div class="ch-head"><span class="ch-num">03</span><h2>损益实验室</h2></div>
+  <p class="ch-sub">自由组合任意腿数，实时看到损益结构。先点一个预设看看形状，再改行权价、改数量，观察图形怎么变。理解期权的最快方法就是<b>看形状</b>——每一种结构都有独一无二的轮廓。</p>
+
+  <div class="card">
+    <div class="pad" style="border-bottom:1px solid var(--rule)">
+      <h4 class="mini">载入预设结构</h4>
+      <div class="chipbar" id="labPresets"></div>
+    </div>
+    <div class="pad" style="border-bottom:1px solid var(--rule)">
+      <div class="grid3">
+        <label class="ctrl"><span>当前股价 <b id="labSv">$100</b></span><input type="range" id="labS" min="60" max="140" step="1" value="100"></label>
+        <label class="ctrl"><span>剩余天数 <b id="labTv">45 天</b></span><input type="range" id="labT" min="1" max="180" step="1" value="45"></label>
+        <label class="ctrl"><span>隐含波动率 <b id="labIVv">30%</b></span><input type="range" id="labIV" min="10" max="120" step="1" value="30"></label>
+      </div>
+    </div>
+    <div class="pad" style="border-bottom:1px solid var(--rule)">
+      <h4 class="mini">头寸构成</h4>
+      <div class="leg-row" style="margin-bottom:8px">
+        <span class="lbl">方向</span><span class="lbl">类型</span><span class="lbl">行权价 / 成本</span><span class="lbl">权利金</span><span class="lbl">数量</span><span></span>
+      </div>
+      <div id="labLegs"></div>
+      <div class="chipbar" style="margin-top:10px">
+        <button class="btn" data-add="call">+ 期权腿</button>
+        <button class="btn" data-add="stock">+ 正股 100 股</button>
+        <button class="btn" data-add="theo">按模型重算权利金</button>
+        <button class="btn" data-add="clear">清空</button>
+      </div>
+    </div>
+    <div class="pad"><div id="labChart"></div></div>
+  </div>
+</section>
+
+<!-- ============ 4. 策略库 ============ -->
+<section class="chapter wrap" id="strategies">
+  <div class="ch-head"><span class="ch-num">04</span><h2>策略库 · 19 种结构</h2></div>
+  <p class="ch-sub">全部使用同一支示例股票：<b>XYZ 现价 $100，隐含波动率 30%，45 天到期</b>，权利金由 Black-Scholes 计算，因此各策略之间的数字可以直接横向比较。点开任意一条查看结构图、盈亏条件、适用场景与风险。</p>
+  <div class="filterbar" id="stratFilter"></div>
+  <div id="stratList"></div>
+</section>
+
+<!-- ============ 5. 备兑手册 ============ -->
+<section class="chapter wrap" id="cc">
+  <div class="ch-head"><span class="ch-num">05</span><h2>备兑开仓实操手册</h2></div>
+  <p class="ch-sub">这一章回答四个具体问题：什么时候该卖、卖哪个行权价、卖哪个到期日、卖多少张。备兑是最容易上手也最容易做错的策略——做错的方式通常不是亏钱，而是<b>长期悄悄跑输单纯持股</b>。</p>
+
+  <div class="grid2">
+    <div class="card pad">
+      <h4 class="mini">先过这道门：什么时候适合卖</h4>
+      <ul class="tick">
+        <li><b>你愿意在行权价卖掉这些股票。</b>这是第一条也是唯一的硬条件。如果你会因为被行权而懊悔，就不要卖。</li>
+        <li><b>预期温和</b>：横盘、慢涨或小幅回调。你在卖出「大涨」这个尾部情形的概率。</li>
+        <li><b>IV Rank &gt; 30</b>（最好 &gt; 50）。IV 低的时候权利金薄如纸，承担同样的封顶风险却只收到零钱。</li>
+        <li><b>到期日之前没有财报</b>，除非你刻意要吃 IV Crush 并接受被行权。</li>
+        <li><b>股价接近你的目标价或阻力位</b>，此时上涨空间的机会成本最低。</li>
+      </ul>
+      <h4 class="mini" style="margin-top:20px">什么时候不该卖</h4>
+      <ul class="tick">
+        <li>刚刚大跌之后。此时你既有浮亏，权利金又因为股价低而缩水，卖 Call 相当于把反弹空间也一起交出去。</li>
+        <li>你的核心长期持仓、准备拿三五年的票。封顶几次大涨，长期复利会差出一大截。</li>
+        <li>并购传闻、重大催化剂前夕。跳空 40% 时你只能眼睁睁看着。</li>
+        <li>持股不足 100 股的整数倍。</li>
+        <li>成本价远高于现价时卖成本价以下的 Call —— 那是在锁定亏损。</li>
+      </ul>
+    </div>
+    <div class="card pad">
+      <h4 class="mini">选行权价：三种方法</h4>
+      <p class="tight"><b>方法一 · Delta 定位（最常用）</b><br>直接用 Delta 当被行权概率来选：</p>
+      <table class="t">
+        <tr><th>Delta</th><th>风格</th><th>被行权概率</th><th>权利金</th><th>适用</th></tr>
+        <tr><td class="n">0.15–0.20</td><td>保守</td><td class="n">~18%</td><td>薄</td><td>不想丢股票，只想小赚</td></tr>
+        <tr><td class="n">0.25–0.35</td><td class="amberc"><b>标准</b></td><td class="n">~30%</td><td>适中</td><td><b>多数情况的最优解</b></td></tr>
+        <tr><td class="n">0.40–0.50</td><td>激进</td><td class="n">~45%</td><td>厚</td><td>准备卖股票，或想要更多下行缓冲</td></tr>
+      </table>
+      <p class="tight" style="margin-top:14px"><b>方法二 · 技术位定位</b><br>把行权价放在明确的阻力位 / 前高之上。如果股价真的到那里，你本来也打算减仓。</p>
+      <p class="tight"><b>方法三 · 目标收益率倒推</b><br>先定「我要 2% 月度权利金收益」，再在期权链里找哪个行权价的权利金 ÷ 股价 ≈ 2%。这个方法的好处是纪律性强，坏处是 IV 低时会逼你卖太近的行权价——<b>这时正确的做法是不卖，而不是降低标准</b>。</p>
+      <div class="note" style="margin-bottom:0">三种方法冲突时以第一条硬条件为准：<b>你能不能接受在这个价格卖出</b>。</div>
+    </div>
+  </div>
+
+  <div class="card pad" style="margin-top:18px">
+    <h4 class="mini">选到期日：为什么是 30–45 天</h4>
+    <div class="twocol">
+      <div>
+        <p class="tight">时间价值的衰减不是匀速的。下图是同一张平值期权在不同剩余天数下的价格——曲线的<b>斜率</b>就是你作为卖方每天赚到的钱。</p>
+        <ul class="tick">
+          <li><b>60 天以上</b>：权利金总额高，但每日衰减慢，资金效率低，且要承担更长时间的不确定性。</li>
+          <li><b>30–45 天</b>：衰减开始加速，同时距离到期还有足够的调整空间。<b>大多数卖方策略的甜区。</b></li>
+          <li><b>7–14 天</b>：日衰减最快，但 Gamma 风险陡增，一个跳空就来不及处理。权利金绝对值也很小，手续费占比高。</li>
+          <li><b>周期权 / 0DTE</b>：适合专职盯盘者，不适合作为备兑的常规工具。</li>
+        </ul>
+        <p class="tight" style="color:var(--ink-soft);font-size:14px">实操节奏：在 30–45 天开仓，赚到权利金的 <b>50–70%</b> 就提前平仓（通常在 2–3 周内发生），然后开下一轮。不要傻等到期——最后那点钱要用最高的 Gamma 风险去换。</p>
+      </div>
+      <div><div id="thetaChart"></div></div>
+    </div>
+  </div>
+
+  <div class="card pad" style="margin-top:18px">
+    <h4 class="mini">备兑开仓计算器</h4>
+    <p class="tight" style="color:var(--ink-soft);font-size:14px">填入你的真实数字，看清楚这笔交易到底在赚什么、让渡了什么。</p>
+    <div class="twocol">
+      <div>
+        <div class="grid2" style="gap:12px">
+          <label class="ctrl"><span>持股成本价</span><input type="number" id="ccCost" value="100" step="0.01"></label>
+          <label class="ctrl"><span>当前股价</span><input type="number" id="ccSpot" value="100" step="0.01"></label>
+          <label class="ctrl"><span>行权价</span><input type="number" id="ccK" value="105" step="0.5"></label>
+          <label class="ctrl"><span>权利金（每股）</span><input type="number" id="ccPrem" value="2.40" step="0.01"></label>
+          <label class="ctrl"><span>剩余天数</span><input type="number" id="ccDTE" value="45" step="1"></label>
+          <label class="ctrl"><span>持股数量</span><input type="number" id="ccShares" value="100" step="100"></label>
+        </div>
+        <div id="ccWarn"></div>
+      </div>
+      <div><table class="t" id="ccOut"></table></div>
+    </div>
+    <div style="margin-top:14px"><div id="ccChart"></div></div>
+  </div>
+
+  <div class="grid2" style="margin-top:18px">
+    <div class="card pad">
+      <h4 class="mini">卖多少：仓位规则</h4>
+      <ul class="tick">
+        <li><b>硬约束</b>：每 100 股正股 = 最多 1 张 Call。持有 700 股最多卖 7 张，卖第 8 张那一刻就有一张是裸的。</li>
+        <li><b>不要全仓覆盖。</b>常见做法是只对 50–70% 的持股卖 Call，留一部分裸露给上涨。持有 700 股就卖 4–5 张。</li>
+        <li><b>分批 + 分散到期日</b>：与其一次卖 5 张同一合约，不如分两三批在不同价位和到期日卖出，平滑择时风险。</li>
+        <li><b>单一标的的期权收入不应成为你的现金流依赖。</b>一旦你「需要」这笔权利金，你就会在不该卖的时候卖。</li>
+      </ul>
+      <div class="note" style="margin-bottom:0">一个实用的自检：把你打算卖的所有 Call 都假设被行权，算出届时的总持仓和总现金。如果那个状态你不接受，现在就该减少张数。</div>
+    </div>
+    <div class="card pad">
+      <h4 class="mini">被行权前后怎么处理</h4>
+      <p class="tight"><b>股价临近行权价，你还想留住股票：</b></p>
+      <ul class="tick">
+        <li><b>向上向外滚动（Roll Up &amp; Out）</b>：买回当前 Call，卖出更高行权价、更远到期日的 Call。只在能<b>净收权利金</b>时才滚——如果要倒贴钱才能滚，说明你在补贴一个已经错了的判断。</li>
+        <li><b>直接买回认输</b>：付出成本，恢复完整的股票敞口。当基本面出现重大利好时这是对的选择。</li>
+        <li><b>什么都不做</b>：接受被行权。你在开仓时就同意了这个价格，履约不是失败。</li>
+      </ul>
+      <p class="tight" style="margin-top:12px"><b>被行权之后：</b>股票以行权价卖出，权利金已入袋。此时可以卖出现金担保看跌期权重新建仓，进入轮子循环。</p>
+      <div class="warn" style="margin-bottom:0"><b>除息日陷阱</b>：若某张 Call 深度价内，且剩余时间价值小于即将派发的股息，对手方很可能在<b>除息日前一天</b>提前行权来拿股息。持有高股息股票做备兑时，一定要在除息日前检查这一点。</div>
+    </div>
+  </div>
+
+  <div class="card pad" style="margin-top:18px">
+    <h4 class="mini">五个最常见的备兑错误</h4>
+    <div class="grid2" style="gap:14px">
+      <div><b>1. 在自己最看好的票上卖 Call</b><p class="tight" style="font-size:14px;color:var(--ink-soft)">这是把最好的资产的上涨空间，换成最便宜的现金。备兑应该用在你评价「还行」的持仓上。</p></div>
+      <div><b>2. 为了权利金去买股票</b><p class="tight" style="font-size:14px;color:var(--ink-soft)">顺序反了。先有你愿意持有的股票，再考虑卖 Call。为了收租买进垃圾股，权利金再厚也补不上本金亏损。</p></div>
+      <div><b>3. 卖在成本价以下</b><p class="tight" style="font-size:14px;color:var(--ink-soft)">成本 $100 的股票现价 $80，你卖 $85 的 Call。被行权就锁定了 15% 的实亏。要卖也应卖在成本价之上。</p></div>
+      <div><b>4. 把权利金当作下跌保护</b><p class="tight" style="font-size:14px;color:var(--ink-soft)">2.4% 的权利金抵不了 30% 的下跌。备兑降低成本，但它<b>不是对冲</b>。真的要保护就得买 Put。</p></div>
+      <div><b>5. 死等到期</b><p class="tight" style="font-size:14px;color:var(--ink-soft)">权利金已经赚到 70%，剩下的 30% 要用最高的 Gamma 风险和最长的时间去换。提前平仓，开下一轮。</p></div>
+      <div><b>6. 忽略交易成本与税</b><p class="tight" style="font-size:14px;color:var(--ink-soft)">高频滚动会产生大量短期资本利得，被行权还会实现股票的长期盈亏。税后收益常常比你算的低不少。</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 6. 风险 ============ -->
+<section class="chapter wrap" id="risk">
+  <div class="ch-head"><span class="ch-num">06</span><h2>风险清单</h2></div>
+  <p class="ch-sub">期权的风险不只是「方向看错」。下面这些是真正让账户出事的东西，而它们大多不出现在损益图上。</p>
+  <div class="grid3">
+    <div class="card pad"><h4 class="mini">流动性风险</h4><p class="tight" style="font-size:14px">买卖价差过宽时，你开仓即亏 5–10%。检查 OI、成交量与价差宽度，永远用限价单。冷门合约在急需平仓时可能根本没有对手方。</p></div>
+    <div class="card pad"><h4 class="mini">提前指派</h4><p class="tight" style="font-size:14px">美式期权的卖方随时可能被指派，尤其是除息日前的价内 Call。指派会在你毫无准备时改变持仓结构，甚至触发保证金不足。</p></div>
+    <div class="card pad"><h4 class="mini">Gamma 与到期日风险</h4><p class="tight" style="font-size:14px">临近到期时头寸性质会剧变。到期日收盘时股价恰好在行权价附近（Pin Risk），你无法确定是否会被指派，周一开盘可能持有意外的股票敞口。</p></div>
+    <div class="card pad"><h4 class="mini">IV Crush</h4><p class="tight" style="font-size:14px">财报、审批、大会前 IV 被推高，事件落地后瞬间回落 30–50%。买方在这种时点入场，方向猜对也常常亏钱。事件前应该做卖方还是买方，取决于隐含波动 vs 你预期的实际波动。</p></div>
+    <div class="card pad"><h4 class="mini">保证金与强平</h4><p class="tight" style="font-size:14px">卖方头寸的保证金要求会随市场变动。剧烈行情中保证金可能翻倍，券商有权在最差价格强制平仓，且不必征求你的同意。</p></div>
+    <div class="card pad"><h4 class="mini">尾部与跳空</h4><p class="tight" style="font-size:14px">期权定价假设股价连续变动，但并购、退市、暴雷会跳空。所有「无限亏损」结构在跳空面前都没有止损的机会。这是拒绝裸卖的根本理由。</p></div>
+  </div>
+
+  <div class="card pad" style="margin-top:18px">
+    <h4 class="mini">仓位规则：写下来，然后执行</h4>
+    <div class="grid2">
+      <ul class="tick">
+        <li><b>单笔买方仓位 ≤ 账户 1–2%</b>，并且默认它会归零。归零不该影响你的生活或下一笔决策。</li>
+        <li><b>单笔卖方的最大亏损 ≤ 账户 2–5%</b>。注意是「最大亏损」不是「保证金」——信用价差要按价差宽度算。</li>
+        <li><b>高风险投机（0DTE、末日期权）的单笔上限要小到「亏光也无所谓」</b>，且必须提前设定当日次数上限，否则会变成连续下注。</li>
+      </ul>
+      <ul class="tick">
+        <li><b>相关性检查</b>：五个半导体标的的看涨仓位不是五笔交易，是一笔。按板块合并计算敞口。</li>
+        <li><b>用组合总 Delta 管理方向</b>，而不是逐笔看。总 Delta 除以 100 就是你等效持有多少股。</li>
+        <li><b>先写退出条件再开仓</b>：赚多少平、亏多少止、到什么日期无条件了结。事后再想的规则不叫规则。</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 7. 案例 ============ -->
+<section class="chapter wrap" id="cases">
+  <div class="ch-head"><span class="ch-num">07</span><h2>完整案例走一遍</h2></div>
+  <p class="ch-sub">前面每个策略都有单独案例，这里放三个跨越多个决策点的完整故事，包含一个失败案例——因为大部分教学材料只讲赢的那一半。</p>
+
+  <div class="card pad" style="margin-bottom:18px">
+    <h4 class="mini">案例 A · 备兑的完整生命周期（含滚动）</h4>
+    <p class="tight">持有 500 股 XYZ，成本 $92，现价 $100。IV Rank 58，未来两个月无财报。</p>
+    <ol style="padding-left:18px">
+      <li><b>决策</b>：只对 300 股卖 Call（60% 覆盖），留 200 股完全裸露给可能的上涨。</li>
+      <li><b>开仓</b>：卖 3 张 45 天 105 Call @ $2.40，收 $720。Delta 0.36，被行权概率约 36%。</li>
+      <li><b>第 18 天</b>：股价 $99，期权跌到 $1.00。已赚 $420，占权利金 58%。<b>按规则平仓</b>，付 $300 买回，净赚 $420。</li>
+      <li><b>第 19 天开新仓</b>：卖 3 张新的 45 天 105 Call @ $2.30，收 $690。</li>
+      <li><b>第 35 天</b>：股价冲到 $107，期权涨到 $4.50，浮亏 $660。判断：基本面无变化，$107 仍在我愿意卖出的价格附近 → <b>选择向上向外滚动</b>：买回 105 Call 付 $1,350，卖出 75 天后的 112 Call 收 $1,410，净收 $60，同时把封顶价从 $105 抬到 $112。</li>
+      <li><b>结果</b>：累计权利金 $420 + $60 = $480（对应 300 股约 1.6% 的额外收益），并且保留了到 $112 的上涨空间。</li>
+    </ol>
+    <div class="note" style="margin-bottom:0">关键动作有两个：<b>只覆盖部分持仓</b>，以及<b>只在能净收权利金时滚动</b>。若滚动需要倒贴，正确做法是接受被行权。</div>
+  </div>
+
+  <div class="card pad" style="margin-bottom:18px">
+    <h4 class="mini">案例 B · 用 CSP 建仓，被行权后转备兑（轮子实战）</h4>
+    <p class="tight">你想买 XYZ 但觉得 $100 偏贵，愿意在 $95 以下持有，可动用资金 $19,000。</p>
+    <table class="t">
+      <tr><th>时点</th><th>动作</th><th>现金流</th><th>持仓状态</th></tr>
+      <tr><td>第 0 天</td><td>卖 2 张 45 天 95 Put @ $1.90</td><td class="n gain">+$380</td><td>冻结 $19,000 现金</td></tr>
+      <tr><td>第 45 天</td><td>股价 $91，被行权</td><td class="n loss">−$19,000</td><td>持有 200 股，实际成本 $93.10</td></tr>
+      <tr><td>第 46 天</td><td>卖 2 张 45 天 95 Call @ $1.60</td><td class="n gain">+$320</td><td>成本降至 $91.50</td></tr>
+      <tr><td>第 91 天</td><td>股价 $97，被行权卖出</td><td class="n gain">+$19,000</td><td>空仓，回到起点</td></tr>
+    </table>
+    <p class="tight" style="margin-top:10px">总收益 $380 + $320 + ($95−$95)×200 = <b>$700</b>，占用 $19,000 约 3 个月，年化约 <b>14.7%</b>。同期若直接在 $100 买入并持有到 $97，则亏损 $600。<b>轮子在震荡市里的优势就体现在这里。</b></p>
+  </div>
+
+  <div class="card pad">
+    <h4 class="mini">案例 C · 一次失败：财报前买跨式</h4>
+    <p class="tight">财报前一天，XYZ $100，你判断这次财报会有大动作。</p>
+    <ul class="tick">
+      <li>财报前 IV 被推到 <b>62%</b>（平时 30%）。平值跨式报价 $11.60，隐含波动 ±11.6%。</li>
+      <li>财报公布，股价跳空到 <b>$108</b>（+8%）。方向和你想的一样，幅度也不算小。</li>
+      <li>但 IV 从 62% 崩到 <b>32%</b>。Call 只值 $8.60（几乎全是内在价值），Put 只剩 $0.40。</li>
+      <li><b>结果：组合值 $9.00，亏损 $260（−22%）。</b>股价动了 8%，你依然亏钱。</li>
+    </ul>
+    <p class="tight" style="margin-top:10px">这笔交易从开仓的一刻就注定难赢：市场定价的波动是 ±11.6%，你实际只拿到 8%。<b>买期权真正的问题不是「会不会动」，而是「会不会动得比市场定价更多」。</b>财报前买入的正确姿势，是先算出隐含波动幅度，再问自己是否真的相信会超过它——大多数时候答案是否定的。</p>
+  </div>
+</section>
+
+<!-- ============ 8. 自测 ============ -->
+<section class="chapter wrap" id="quiz">
+  <div class="ch-head"><span class="ch-num">08</span><h2>自测</h2></div>
+  <p class="ch-sub">10 道题，覆盖上面所有章节的核心判断。选错不要紧，解释才是重点。</p>
+  <div id="quizList"></div>
+</section>
+`;
+
+const QUIZ = [
+  { q: "你以 $100 买入 100 股，卖出 45 天后的 105 Call 收 $2.40。到期股价 $130，你的总损益是多少？",
+    o: ["+$3,000", "+$740", "+$240", "−$2,260"], a: 1,
+    e: "股票被按 $105 交割：(105−100)×100 = $500，加上权利金 $240，合计 +$740。虽然股价涨到 $130，但你的收益在 $105 就封顶了。少赚的 $2,260 是备兑的机会成本——不是亏损，但长期反复发生会显著拖累收益。" },
+  { q: "关于「卖出现金担保看跌期权」，下面哪句话是<b>错的</b>？",
+    o: ["它的收益结构与备兑开仓基本相同", "它适合用来在心仪价格建仓", "它的最大亏损是收到的权利金", "只应该在你愿意持有的标的上做"], a: 2,
+    e: "最大亏损远不止权利金。卖出 95 Put 收 $1.90，若股价归零，你要按 $95 接货，亏损 $9,310。卖方的共同特征是收益有限、风险巨大——这正是必须选择自己愿意持有的标的的原因。" },
+  { q: "财报前你买入平值跨式，成本 $11.60（股价 $100）。财报后股价涨到 $108，你却亏钱了。最可能的原因是？",
+    o: ["Delta 计算错误", "IV Crush：隐含波动率从高位崩塌", "Gamma 变成负数", "期权被提前行权"], a: 1,
+    e: "$11.60 的成本意味着市场定价的波动是 ±11.6%，而实际只有 8%。同时事件落地后 IV 大幅回落，两条腿的时间价值同时蒸发。买波动率赚的是「实际波动 > 隐含波动」，不是「有波动」。" },
+  { q: "关于备兑开仓的到期日选择，为什么 30–45 天通常是甜区？",
+    o: ["因为这个期限的权利金绝对值最高", "因为时间价值衰减开始加速，同时 Gamma 风险仍可控", "因为券商手续费最低", "因为这个期限不会被提前行权"], a: 1,
+    e: "时间价值衰减是非线性的，最后 30 天明显加速。更长的期限权利金总额高但日衰减慢、资金效率低；7–14 天日衰减最快但 Gamma 陡增，一次跳空就来不及处理。30–45 天在两者之间取得平衡。" },
+  { q: "你持有 250 股某股票，最多可以卖出几张备兑看涨期权？",
+    o: ["2 张", "2.5 张", "3 张", "取决于保证金"], a: 0,
+    e: "每 100 股对应 1 张，250 股只能覆盖 2 张，剩下 50 股不足一张。若卖出第 3 张，那一张就是裸卖看涨期权，风险性质完全改变，理论亏损无上限。" },
+  { q: "牛市看跌价差（卖 95 Put / 买 90 Put）净收 $115，最大亏损 $385。要长期不亏钱，胜率至少要达到多少？",
+    o: ["50%", "60%", "77%", "90%"], a: 2,
+    e: "盈亏平衡胜率 = 最大亏损 ÷ (最大亏损 + 最大盈利) = 385 ÷ 500 = 77%。这就是信用价差的本质：高胜率并不等于正期望。所以必须在 IV 高、权利金厚的时候做，才能压低这个门槛。" },
+  { q: "下列哪种情况<b>最</b>可能触发看涨期权卖方被提前指派？",
+    o: ["股价刚刚突破行权价", "隐含波动率大幅上升", "深度价内且明天除息，剩余时间价值低于股息", "距离到期还有 40 天"], a: 2,
+    e: "当剩余时间价值小于即将派发的股息时，提前行权拿股息对买方更划算。持有高股息股票做备兑的人必须在除息日前检查这一点，否则会在毫无准备时丢掉股票。" },
+  { q: "关于「穷人的备兑」（PMCC），下面哪句最准确？",
+    o: ["它的风险比真实备兑更低，因为投入更少", "它的绝对亏损更小，但长期腿会到期归零，失去了「熬过去」的选项", "它可以拿到股息", "长期腿选虚值 Call 效果最好"], a: 1,
+    e: "PMCC 用 LEAPS 替代正股，资金效率高，但股价跌破长期腿行权价时是 100% 本金亏损，而持股只是浮亏、可以等待。长期腿必须选 Delta ≥ 0.80、到期 ≥ 9 个月，且没有股息。" },
+  { q: "你打算投入 $10,000 买 100 股某股票，改用 LEAPS 替代。正确做法是？",
+    o: ["买 4 张 LEAPS 用满 $10,000", "买 1 张 LEAPS，其余资金留作现金或其他配置", "买尽可能多的虚值 Call", "买 2 张短期平值 Call"], a: 1,
+    e: "杠杆工具的作用是节省资金占用，不是放大仓位。买满 4 张等于把原本 100 股的敞口变成约 340 股，风险放大了三倍多。正确的做法是保持等效敞口不变，把省下的资金留作缓冲。" },
+  { q: "铁鹰式的理论胜率约 70%，最大盈利 $235、最大亏损 $265。下面哪个说法最重要？",
+    o: ["胜率高所以可以放心重仓", "利润很薄，四条腿的交易成本会吃掉相当大一块，且趋势行情会连续击穿", "它没有方向风险", "它适合在低 IV 时做"], a: 1,
+    e: "铁鹰是典型的「赢面大、赔率差」结构：开平共 8 笔交易的成本相对 $235 的利润并不小；一旦市场进入趋势，胜率下降会立刻转为亏损。它应该在 IV 高位、预期区间震荡时做，且必须有明确的止损或调整规则。" }
+];
+
+/* ================= 注入正文 ================= */
+document.getElementById("content").innerHTML = CHAPTERS;
+const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
+const byId = id => STRATEGIES.find(s => s.id === id);
+
+/* ================= HERO ================= */
+const HERO = ["covered-call", "long-call", "bull-call", "iron-condor", "collar"];
+let heroPick = "covered-call";
+function drawHero() {
+  const s = byId(heroPick);
+  $("#heroChips").innerHTML = HERO.map(id =>
+    `<button class="btn ${id === heroPick ? "on" : ""}" data-hero="${id}">${byId(id).name}</button>`).join("");
+  payoffChart($("#heroChart"), { legs: s.legs, S0, T: 45 / 365, iv: .30, readout: false, h: 280 });
+  const m = metrics(s.legs, S0);
+  $("#heroStats").innerHTML = `
+    <div class="stat"><b>结构</b><i style="font-size:14px">${s.en}</i></div>
+    <div class="stat"><b>最大盈利</b><i class="gain">${m.maxP === Infinity ? "无上限" : usd(m.maxP)}</i></div>
+    <div class="stat"><b>最大亏损</b><i class="loss">${m.maxL === -Infinity ? "无下限" : usd(m.maxL)}</i></div>
+    <div class="stat"><b>盈亏平衡</b><i>${m.be.length ? m.be.map(b => "$" + fmt(b, 2)).join(" / ") : "—"}</i></div>
+    <div class="stat"><b>净权利金</b><i class="${m.net >= 0 ? "gain" : "loss"}">${m.net >= 0 ? "收 " : "付 "}${usd(Math.abs(m.net))}</i></div>`;
+  $$("#heroChips [data-hero]").forEach(b => b.onclick = () => { heroPick = b.dataset.hero; drawHero(); });
+}
+drawHero();
+
+/* ================= 时间价值示意图 ================= */
+(() => {
+  const d1 = [], d2 = [];
+  for (let s = 70; s <= 130; s += .5) {
+    d1.push([s, bs(s, 100, 45 / 365, .30, .04, "call").price]);
+    d2.push([s, Math.max(s - 100, 0)]);
+  }
+  lineChart($("#tvChart"), {
+    xmin: 70, xmax: 130, xlabel: "股价（行权价 $100，45 天，IV 30%）", h: 220, marker: 100,
+    series: [
+      { name: "期权当前价格", data: d1, color: "var(--accent)" },
+      { name: "内在价值（到期价值）", data: d2, color: "var(--ink)", dash: true }
+    ]
+  });
+})();
+
+/* ================= 希腊字母面板 ================= */
+const GK = { S: 100, K: 100, T: 45, IV: 30, type: "call", tab: "price" };
+const GK_TABS = [["price", "期权价格"], ["delta", "Delta"], ["gamma", "Gamma"], ["theta", "Theta"], ["vega", "Vega"]];
+function gkRender() {
+  $("#gkControls").innerHTML = `
+    <label class="ctrl"><span>股价 <b>$${GK.S}</b></span><input type="range" id="gS" min="60" max="140" step="1" value="${GK.S}"></label>
+    <label class="ctrl"><span>行权价 <b>$${GK.K}</b></span><input type="range" id="gK" min="70" max="130" step="1" value="${GK.K}"></label>
+    <label class="ctrl"><span>剩余天数 <b>${GK.T} 天</b></span><input type="range" id="gT" min="1" max="365" step="1" value="${GK.T}"></label>
+    <label class="ctrl"><span>隐含波动率 <b>${GK.IV}%</b></span><input type="range" id="gV" min="5" max="150" step="1" value="${GK.IV}"></label>
+    <label class="ctrl"><span>类型</span>
+      <select id="gType"><option value="call"${GK.type === "call" ? " selected" : ""}>看涨 Call</option><option value="put"${GK.type === "put" ? " selected" : ""}>看跌 Put</option></select></label>
+    <div style="display:flex;align-items:flex-end;padding-bottom:12px;font-size:13px;color:var(--ink-soft)">
+      拖动滑块观察：把剩余天数拉到 3 天，看 Gamma 与 Theta 如何暴走。</div>`;
+  ["gS", "gK", "gT", "gV"].forEach(id => $("#" + id).oninput = e => {
+    GK[{ gS: "S", gK: "K", gT: "T", gV: "IV" }[id]] = +e.target.value; gkRender();
+  });
+  $("#gType").onchange = e => { GK.type = e.target.value; gkRender(); };
+  $("#gkTabs").innerHTML = GK_TABS.map(([k, n]) => `<button class="btn ${GK.tab === k ? "on" : ""}" data-tab="${k}">${n}</button>`).join("");
+  $$("#gkTabs [data-tab]").forEach(b => b.onclick = () => { GK.tab = b.dataset.tab; gkRender(); });
+
+  const T = GK.T / 365, v = GK.IV / 100, data = [], now = [];
+  for (let s = 60; s <= 140; s += .5) {
+    const g = bs(s, GK.K, T, v, .04, GK.type);
+    data.push([s, GK.tab === "price" ? g.price : g[GK.tab]]);
+    if (GK.tab === "price") now.push([s, GK.type === "call" ? Math.max(s - GK.K, 0) : Math.max(GK.K - s, 0)]);
+  }
+  const names = { price: "期权价格", delta: "Delta", gamma: "Gamma", theta: "Theta（每日）", vega: "Vega（每 1% IV）" };
+  lineChart($("#gkChart"), {
+    xmin: 60, xmax: 140, xlabel: "股价", h: 250, marker: GK.S, zero: GK.tab !== "price" && GK.tab !== "gamma",
+    series: [{ name: names[GK.tab], data, color: "var(--accent)" }]
+      .concat(GK.tab === "price" ? [{ name: "到期价值", data: now, color: "var(--ink)", dash: true }] : [])
+  });
+  const g = bs(GK.S, GK.K, T, v, .04, GK.type);
+  const intr = GK.type === "call" ? Math.max(GK.S - GK.K, 0) : Math.max(GK.K - GK.S, 0);
+  $("#gkOut").innerHTML = `
+    <div><b>期权价格</b><i>$${fmt(g.price)}</i></div>
+    <div><b>内在 / 时间价值</b><i>$${fmt(intr)} / $${fmt(g.price - intr)}</i></div>
+    <div><b>Delta</b><i>${fmt(g.delta, 3)}</i></div>
+    <div><b>Gamma</b><i>${fmt(g.gamma, 4)}</i></div>
+    <div><b>Theta / 日</b><i class="loss">$${fmt(g.theta, 3)}</i></div>
+    <div><b>Vega / 1% IV</b><i>$${fmt(g.vega, 3)}</i></div>`;
+}
+gkRender();
+
+/* ================= 损益实验室 ================= */
+let LAB = { S: 100, T: 45, IV: 30, legs: JSON.parse(JSON.stringify(byId("covered-call").legs)) };
+$("#labPresets").innerHTML = STRATEGIES.map(s => `<button class="btn" data-p="${s.id}">${s.name}</button>`).join("");
+$$("#labPresets [data-p]").forEach(b => b.onclick = () => {
+  LAB.legs = JSON.parse(JSON.stringify(byId(b.dataset.p).legs));
+  $$("#labPresets .btn").forEach(x => x.classList.remove("on")); b.classList.add("on"); labRender();
+});
+["labS", "labT", "labIV"].forEach(id => $("#" + id).oninput = e => {
+  LAB[{ labS: "S", labT: "T", labIV: "IV" }[id]] = +e.target.value; labRender();
+});
+$$("#lab [data-add]").forEach(b => b.onclick = () => {
+  const a = b.dataset.add;
+  if (a === "clear") LAB.legs = [];
+  else if (a === "stock") LAB.legs.push({ kind: "stock", dir: 1, K: LAB.S, prem: 0, qty: 1 });
+  else if (a === "theo") LAB.legs.forEach(l => {
+    if (l.kind !== "stock") l.prem = +bs(LAB.S, l.K, LAB.T / 365, LAB.IV / 100, .04, l.kind).price.toFixed(2);
+  });
+  else LAB.legs.push({ kind: "call", dir: 1, K: Math.round(LAB.S), prem: +bs(LAB.S, Math.round(LAB.S), LAB.T / 365, LAB.IV / 100, .04, "call").price.toFixed(2), qty: 1 });
+  labRender();
+});
+function labRender() {
+  $("#labSv").textContent = "$" + LAB.S; $("#labTv").textContent = LAB.T + " 天"; $("#labIVv").textContent = LAB.IV + "%";
+  $("#labLegs").innerHTML = LAB.legs.map((l, i) => `
+    <div class="leg-row">
+      <select data-i="${i}" data-f="dir"><option value="1"${l.dir === 1 ? " selected" : ""}>买入</option><option value="-1"${l.dir === -1 ? " selected" : ""}>卖出</option></select>
+      <select data-i="${i}" data-f="kind">
+        <option value="call"${l.kind === "call" ? " selected" : ""}>Call</option>
+        <option value="put"${l.kind === "put" ? " selected" : ""}>Put</option>
+        <option value="stock"${l.kind === "stock" ? " selected" : ""}>正股</option></select>
+      <input type="number" step="0.5" data-i="${i}" data-f="K" value="${l.K}">
+      <input type="number" step="0.05" data-i="${i}" data-f="prem" value="${l.prem}" ${l.kind === "stock" ? "disabled" : ""}>
+      <input type="number" step="1" min="1" data-i="${i}" data-f="qty" value="${l.qty}">
+      <button class="xbtn" data-del="${i}" aria-label="删除这条腿">×</button>
+    </div>`).join("") || `<p style="color:var(--ink-faint);font-size:14px;margin:4px 0">还没有头寸。点上面的预设，或用下面的按钮添加。</p>`;
+  $$("#labLegs [data-f]").forEach(el => el.onchange = e => {
+    const l = LAB.legs[+e.target.dataset.i], f = e.target.dataset.f;
+    l[f] = f === "kind" ? e.target.value : +e.target.value;
+    if (f === "kind" && l.kind === "stock") { l.prem = 0; l.K = LAB.S; }
+    if (f === "kind" && l.kind !== "stock") l.prem = +bs(LAB.S, l.K, LAB.T / 365, LAB.IV / 100, .04, l.kind).price.toFixed(2);
+    labRender();
+  });
+  $$("#labLegs [data-del]").forEach(el => el.onclick = e => { LAB.legs.splice(+e.target.dataset.del, 1); labRender(); });
+  payoffChart($("#labChart"), { legs: LAB.legs, S0: LAB.S, T: LAB.T / 365, iv: LAB.IV / 100, h: 340, span: .5 });
+}
+labRender();
+
+/* ================= 策略库 ================= */
+const LEVELS = [["all", "全部"], ["1", "入门"], ["2", "进阶"], ["3", "高级"]];
+let lvFilter = "all";
+$("#stratFilter").innerHTML = `<em>难度</em>` + LEVELS.map(([k, n]) =>
+  `<button class="btn ${k === "all" ? "on" : ""}" data-lv="${k}">${n}</button>`).join("");
+$$("#stratFilter [data-lv]").forEach(b => b.onclick = () => {
+  lvFilter = b.dataset.lv;
+  $$("#stratFilter .btn").forEach(x => x.classList.remove("on")); b.classList.add("on");
+  $$(".strat").forEach(el => el.style.display = (lvFilter === "all" || el.dataset.lv === lvFilter) ? "" : "none");
+});
+$("#stratList").innerHTML = STRATEGIES.map((s, i) => `
+  <article class="strat" data-lv="${s.lv}" data-id="${s.id}">
+    <div class="strat-head" role="button" tabindex="0" aria-expanded="false">
+      <span class="strat-idx">${String(i + 1).padStart(2, "0")}</span>
+      <span class="strat-name">${s.name}</span>
+      <span class="strat-en">${s.en}</span>
+      <span class="tag dir">${s.dir}</span>
+      <span class="tag lv${s.lv}">${["入门", "进阶", "高级"][s.lv - 1]}</span>
+    </div>
+    <div class="strat-body">
+      <p style="margin-top:0">${s.meaning}</p>
+      <div class="twocol">
+        <div>
+          <div class="legs">${s.legs.map(l =>
+            l.kind === "stock" ? `<div>${l.dir > 0 ? "买入" : "卖出"} ${l.qty * 100} 股正股 @ $${fmt(l.K)}</div>`
+              : `<div>${l.dir > 0 ? "买入" : "卖出"} ${l.qty} 张 $${fmt(l.K, 0)} ${l.kind === "call" ? "Call" : "Put"} @ $${fmt(l.prem)}</div>`).join("")}</div>
+          <dl class="kv">
+            <dt>构建</dt><dd>${s.build}</dd>
+            <dt>最大盈利</dt><dd class="gain">${s.profit}</dd>
+            <dt>最大亏损</dt><dd class="loss">${s.loss}</dd>
+            <dt>盈亏平衡</dt><dd>${s.be}</dd>
+            <dt>何时适用</dt><dd>${s.when}</dd>
+            <dt>风险</dt><dd>${s.risk}</dd>
+            <dt>有正股时</dt><dd>${s.stockRisk}</dd>
+          </dl>
+        </div>
+        <div>
+          <div class="chart-slot"></div>
+          <div class="example">${s.example}</div>
+        </div>
+      </div>
+    </div>
+  </article>`).join("");
+$$(".strat-head").forEach(h => {
+  const toggle = () => {
+    const art = h.parentElement, open = art.classList.toggle("open");
+    h.setAttribute("aria-expanded", open);
+    if (open && !art.dataset.drawn) {
+      art.dataset.drawn = "1";
+      const s = byId(art.dataset.id);
+      payoffChart(art.querySelector(".chart-slot"), { legs: s.legs, S0, T: 45 / 365, iv: .30, h: 280, span: .42 });
+    }
+  };
+  h.onclick = toggle;
+  h.onkeydown = e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); toggle(); } };
+});
+
+/* ================= Theta 衰减曲线 ================= */
+(() => {
+  const atm = [], otm = [];
+  for (let d = 120; d >= 0; d -= 1) {
+    atm.push([d, bs(100, 100, d / 365, .30, .04, "call").price]);
+    otm.push([d, bs(100, 105, d / 365, .30, .04, "call").price]);
+  }
+  lineChart($("#thetaChart"), {
+    xmin: 0, xmax: 120, xlabel: "剩余天数（从右向左读 →）", h: 260,
+    series: [
+      { name: "平值 Call（K=100）", data: atm, color: "var(--accent)" },
+      { name: "虚值 Call（K=105）", data: otm, color: "var(--amber)" }
+    ]
+  });
+})();
+
+/* ================= 备兑计算器 ================= */
+const CC = ["ccCost", "ccSpot", "ccK", "ccPrem", "ccDTE", "ccShares"];
+function ccCalc() {
+  const cost = +$("#ccCost").value, spot = +$("#ccSpot").value, K = +$("#ccK").value,
+    prem = +$("#ccPrem").value, dte = Math.max(+$("#ccDTE").value, 1), sh = Math.max(+$("#ccShares").value, 100);
+  const ct = Math.floor(sh / 100), income = prem * ct * 100;
+  const staticR = prem / spot, staticA = Math.pow(1 + staticR, 365 / dte) - 1;
+  const calledGain = (K - cost + prem) * ct * 100, calledR = (K - cost + prem) / cost, calledA = Math.pow(1 + Math.max(calledR, -0.99), 365 / dte) - 1;
+  const beven = cost - prem, protect = prem / spot, upside = (K - spot) / spot;
+  const d = bs(spot, K, dte / 365, .30, .04, "call").delta;
+
+  $("#ccOut").innerHTML = `
+    <tr><th colspan="2">这笔交易的账本</th></tr>
+    <tr><td>可卖张数（每 100 股 1 张）</td><td class="n"><b>${ct} 张</b>${sh % 100 ? `　<span class="loss">余 ${sh % 100} 股不足一张</span>` : ""}</td></tr>
+    <tr><td>权利金收入</td><td class="n gain">${usd(income)}</td></tr>
+    <tr><td>静态收益率（股价不动）</td><td class="n">${pct(staticR, 2)}　<span style="color:var(--ink-faint)">年化 ${pct(staticA, 1)}</span></td></tr>
+    <tr><td>被行权总收益</td><td class="n ${calledGain >= 0 ? "gain" : "loss"}">${usd(calledGain)}　${pct(calledR, 2)}　<span style="color:var(--ink-faint)">年化 ${pct(calledA, 1)}</span></td></tr>
+    <tr><td>盈亏平衡股价</td><td class="n">$${fmt(beven)}</td></tr>
+    <tr><td>下行缓冲</td><td class="n">${pct(protect, 2)}　<span style="color:var(--ink-faint)">仅此而已，不是保护</span></td></tr>
+    <tr><td>让渡的上涨空间</td><td class="n">${upside >= 0 ? pct(upside, 2) : `<span class="loss">${pct(upside, 2)}（已价内）</span>`}</td></tr>
+    <tr><td>估算被行权概率（Delta）</td><td class="n">${pct(d, 0)}</td></tr>`;
+
+  const w = [];
+  if (K < cost) w.push(`行权价 $${fmt(K)} 低于持股成本 $${fmt(cost)}。被行权将<b>锁定亏损</b>，这通常是错误的备兑用法。`);
+  if (K < spot) w.push(`行权价已在股价之下（价内 Call），被行权概率很高，且面临提前指派风险。`);
+  if (dte < 7) w.push(`剩余 ${dte} 天，Gamma 风险很高，一次跳空就来不及处理。`);
+  if (staticR < .008) w.push(`静态收益率仅 ${pct(staticR, 2)}，权利金过薄。IV 低的时候，正确的选择通常是不卖。`);
+  if (d > .45) w.push(`Delta ${fmt(d, 2)} 偏高，这更接近「准备卖出股票」而不是「收租」。确认你确实愿意在 $${fmt(K)} 卖出。`);
+  if (sh % 100) w.push(`持股 ${sh} 股不是 100 的整数倍，多出的 ${sh % 100} 股无法被覆盖。`);
+  $("#ccWarn").innerHTML = w.length ? w.map(t => `<div class="warn" style="font-size:13.5px">${t}</div>`).join("") :
+    `<div class="note" style="font-size:13.5px">参数看起来合理。开仓前再确认一次：到期日之前有没有财报或除息日？</div>`;
+
+  payoffChart($("#ccChart"), {
+    legs: [{ kind: "stock", dir: 1, K: cost, prem: 0, qty: ct }, { kind: "call", dir: -1, K, prem, qty: ct }],
+    S0: spot, T: dte / 365, iv: .30, h: 300, span: .4
+  });
+}
+CC.forEach(id => $("#" + id).oninput = ccCalc);
+ccCalc();
+
+/* ================= 自测 ================= */
+$("#quizList").innerHTML = QUIZ.map((q, i) => `
+  <div class="q" data-i="${i}">
+    <p class="qs">${i + 1}. ${q.q}</p>
+    ${q.o.map((o, j) => `<button class="opt" data-o="${j}">${String.fromCharCode(65 + j)}. ${o}</button>`).join("")}
+    <div class="exp"><b>解析：</b>${q.e}</div>
+  </div>`).join("");
+$$(".q").forEach(box => {
+  const q = QUIZ[+box.dataset.i];
+  box.querySelectorAll(".opt").forEach(btn => btn.onclick = () => {
+    if (box.classList.contains("done")) return;
+    box.classList.add("done");
+    box.querySelectorAll(".opt").forEach((b, j) => {
+      if (j === q.a) b.classList.add("right");
+      else if (b === btn) b.classList.add("wrong");
+    });
+  });
+});
+
+/* ================= 导航高亮 ================= */
+const links = $$("#topnav a");
+const obs = new IntersectionObserver(es => {
+  es.forEach(e => {
+    if (e.isIntersecting) {
+      links.forEach(a => a.classList.toggle("on", a.getAttribute("href") === "#" + e.target.id));
+    }
+  });
+}, { rootMargin: "-20% 0px -70% 0px" });
+$$("section.chapter").forEach(s => obs.observe(s));
+
+</script>
+</body>
+</html>
